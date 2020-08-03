@@ -34,6 +34,12 @@ INSTALLED_APPS = [
     "esite.images",
     "esite.navigation",
     "esite.utils",
+    "esite.ops.ops_connectors",
+    "esite.ops.ops_dashboard",
+    "esite.ops.ops_gitlabs",
+    "esite.ops.ops_permissions",
+    "esite.ops.ops_pipelines",
+    "esite.ops.ops_scpages",
     # Django core apps
     "django.contrib.admin",
     "django.contrib.auth",
@@ -167,6 +173,8 @@ BIFROST_APPS = {
     "utils": "",
     "documents": "",
     "images": "",
+    "ops_pipelines": "",
+    "ops_scpages": "",
 }
 
 # > Password Validation
