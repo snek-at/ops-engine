@@ -41,15 +41,10 @@ def create_homepage(apps, schema_editor):
         url_path="/ops/",
     )
 
-    # page_content_type, created = ContentType.objects.get_or_create(
-    #     model="OpsScpagesPage", app_label="ops_scpages"
-    # )
-
-    Page.objects.create(
+    OpsScpagesPage.objects.create(
         title="Company Pages",
         slug="company-pages",
-        content_type=page_content_type,
-        path="000100010001",
+        path="00010002",
         depth=2,
         numchild=0,
         url_path="/company-pages/",
