@@ -34,8 +34,14 @@ def create_schema():
     from .types.redirects import RedirectsQuery
 
     from .jwtauth.schema import ObtainJSONWebToken
+    import esite.ops.ops_connectors.schema as opsconn
+    import esite.ops.ops_pipelines.schema as opspipe
+    import esite.ops.ops_gitlabs.schema as opsgitlab
 
     class Query(
+        opsconn.Query,
+        opspipe.Query,
+        opsgitlab.Query,
         graphene.ObjectType,
         PagesQuery(),
         ImagesQuery(),
@@ -57,6 +63,12 @@ def create_schema():
             "verify_token": graphql_jwt.Verify.Field(),
             "refresh_token": graphql_jwt.Refresh.Field(),
             "revoke_token": graphql_jwt.Revoke.Field(),
+            "add_connector": opsconn.AddConnector.Field(),
+            "update_connector": opsconn.UpdateConnector.Field(),
+            "add_pipeline": opspipe.AddPipeline.Field(),
+            "update_pipline": opspipe.UpdatePipeline.Field(),
+            "add_gitlab": opsgitlab.AddGitlab.Field(),
+            "update_gitlab": opsgitlab.UpdateGitlab.Field(),
         }
         dict_params.update(
             (camel_case_to_spaces(n).replace(" ", "_"), mut.Field())

@@ -173,6 +173,7 @@ BIFROST_APPS = {
     "utils": "",
     "documents": "",
     "images": "",
+    "ops_connectors": "",
     "ops_pipelines": "",
     "ops_scpages": "",
 }

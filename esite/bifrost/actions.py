@@ -213,6 +213,7 @@ def build_node_type(
     class StubModel(models.Model):
         class Meta:
             """Can change over time."""
+
             managed = False
 
     class StubMeta:
@@ -248,6 +249,7 @@ def load_type_fields():
                 # Recreate the graphene type with the fields set
                 class Meta:
                     """Can change over time."""
+
                     model = cls
                     interfaces = (interface,) if interface is not None else tuple()
 
@@ -320,6 +322,7 @@ def build_streamfield_type(
     # Create a new blank node type
     class Meta:
         """Can change over time."""
+
         if hasattr(cls, "graphql_types"):
             types = [
                 registry.streamfield_blocks.get(block) for block in cls.graphql_types
@@ -376,6 +379,7 @@ def register_form_model(cls: Type[AbstractForm], type_prefix: str):
     # dict parameters to create GraphQL type
     class Meta:
         """Can change over time."""
+
         model = WagtailPage
         interfaces = (PageInterface,)
 
@@ -418,8 +422,11 @@ def register_form_model(cls: Type[AbstractForm], type_prefix: str):
     @login_required
     def mutate(_self, info, token, url, values):
         url_prefix = url_prefix_for_site(info)
+        print(url, url_prefix + url.rstrip("/") + "/")
         query = WagtailPage.objects.filter(url_path=url_prefix + url.rstrip("/") + "/")
+        # print(query, query.specific())
         instance = with_page_permissions(info.context, query.specific()).live().first()
+        print(instance)
         user = info.context.user
         # convert camelcase to dashes
         values = {
@@ -428,7 +435,9 @@ def register_form_model(cls: Type[AbstractForm], type_prefix: str):
         form = instance.get_form(values, None, page=instance, user=user)
         if form.is_valid():
             # form_submission
+            print("PROCCESS SUBMISION")
             instance.process_form_submission(form)
+            print("PROCCESS SUBMISION END")
             return registry.forms[_node](result="OK")
         else:
             return registry.forms[_node](

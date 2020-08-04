@@ -39,17 +39,21 @@ from esite.bifrost.helpers import register_streamfield_block
 
 
 class Gitlab(models.Model):
-    from ..ops_scpages.models import OpsScpagesPage
+    from ..ops_scpages.models import OpsScpagePage
 
     name = models.CharField(null=True, max_length=255)
+    description = models.CharField(null=True, blank=True, max_length=255)
     domain = models.CharField(null=True, max_length=255)
     token = models.CharField(
         null=True,
         max_length=255,
         help_text="Warning! Changing the token affects the connection to all endpoints.",
     )
-    company_page = ParentalKey(
-        OpsScpagesPage,
+    created = models.DateTimeField(null=True, auto_now_add=True)
+    updated = models.DateTimeField(null=True, auto_now=True)
+    active = models.BooleanField(default=True)
+    company_page = models.ForeignKey(
+        OpsScpagePage,
         on_delete=models.CASCADE,
         related_name="gitlab_scp_page",
         null=True,
@@ -66,6 +70,7 @@ class Gitlab(models.Model):
         MultiFieldPanel(
             [
                 FieldPanel("name"),
+                FieldPanel("description"),
                 FieldPanel("domain"),
                 FieldPanel("token"),
                 FieldPanel("company_page"),

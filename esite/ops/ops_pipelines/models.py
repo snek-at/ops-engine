@@ -29,6 +29,8 @@ from wagtail.admin.edit_handlers import (
 )
 
 import uuid
+import secrets
+from datetime import datetime
 from wagtail.admin.mail import send_mail
 from esite.bifrost.models import (
     GraphQLInt,
@@ -50,73 +52,58 @@ from wagtail.contrib.forms.models import (
     AbstractFormSubmission,
 )
 
-# > Sections
-@register_streamfield_block
-class Pipeline_ActivityBlock(blocks.StructBlock):
-    datetime = blocks.DateTimeBlock(null=True, required=True)
+
+class PipelineActivity(models.Model):
+    datetime = models.DateTimeField(null=True)
+    # data = models.Da
+    pipeline = models.ForeignKey("Pipeline", on_delete=models.CASCADE)
 
 
-@register_streamfield_block
-class _S_PipelineBlock(blocks.StructBlock):
-    name = blocks.CharBlock(
-        null=True, required=True, help_text="Name of the presentator"
-    )
-    url = blocks.URLBlock(
+class Pipeline(models.Model):
+    from ..ops_scpages.models import OpsScpagePage
+
+    name = models.CharField(null=True, blank=True, max_length=255)
+    description = models.CharField(null=True, blank=True, max_length=255)
+    active = models.BooleanField(default=True)
+    token = models.CharField(
         null=True,
-        required=True,
-        help_text="Important! Format https://www.domain.tld/xyz",
+        blank=True,
+        max_length=255,
+        help_text="Warning! Changing the token affects the connection to all endpoints.",
     )
-    description = blocks.TextBlock(
-        null=True, required=False, help_text="Other information"
-    )
-    activity_history = blocks.StreamBlock(
-        [
-            (
-                "activity",
-                Pipeline_ActivityBlock(
-                    null=True, blank=False, icon="fa-calendar-check-o"
-                ),
-            )
-        ],
+    created = models.DateTimeField(null=True, auto_now_add=True)
+    updated = models.DateTimeField(null=True, auto_now=True)
+    company_page = models.ForeignKey(
+        OpsScpagePage,
+        on_delete=models.CASCADE,
+        related_name="pipeline_scp_page",
         null=True,
         blank=True,
     )
-    active = blocks.BooleanBlock(
-        null=False, required=False, default=False, help_text="Is the pipeline active?",
-    )
-    token = blocks.CharBlock()
 
-    graphql_fields = [
-        GraphQLString("name"),
-        GraphQLString("url"),
-        GraphQLString("description"),
-        GraphQLString("activity_history"),
-        GraphQLString("active"),
+    panels = [
+        MultiFieldPanel(
+            [
+                FieldPanel("name"),
+                FieldPanel("description"),
+                FieldPanel("active"),
+                FieldPanel("token"),
+                FieldPanel("company_page"),
+            ],
+            heading="General",
+        ),
     ]
 
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = secrets.token_hex()
 
-# > Pages
-class OpsPipelinesPage(Page):
-    # Only allow creating HomePages at the root level
-    parent_page_types = ["wagtailcore.Page"]
+        # PipelineActivity(datetime=datetime.)
+        super(Pipeline, self).save()
 
-    sections = fields.StreamField(
-        [("S_PipelineBlock", _S_PipelineBlock(null=True, icon="cogs")),],
-        null=True,
-        blank=False,
-    )
-
-    graphql_fields = [
-        GraphQLStreamfield("sections"),
-    ]
-
-    main_content_panels = [
-        StreamFieldPanel("sections"),
-    ]
-
-    content_panels = Page.content_panels + main_content_panels
-
-    preview_modes = []
+    def __str__(self):
+        # latest_activity = PipelineActivity.objects.filter(pipeline=self).last()
+        return f"{self.name}"
 
 
 # Form
@@ -128,7 +115,7 @@ class OpsPipelineFormField(AbstractFormField):
 
 class OpsPipelineFormPage(AbstractEmailForm):
     # Only allow creating HomePages at the root level
-    parent_page_types = ["OpsPipelinesPage"]
+    parent_page_types = ["wagtailcore.Page"]
 
     # When creating a new Form page in Wagtail
     head = models.CharField(null=True, blank=False, max_length=255)

@@ -15,7 +15,9 @@ from wagtail.admin.edit_handlers import (
     ObjectList,
     InlinePanel,
     MultiFieldPanel,
+    FieldRowPanel,
 )
+from wagtail.admin.mail import send_mail
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.snippets.models import register_snippet
 from modelcluster.fields import ParentalKey
@@ -34,13 +36,21 @@ from esite.bifrost.models import (
     GraphQLEmbed,
     GraphQLStreamfield,
 )
+from wagtail.contrib.forms.models import (
+    AbstractForm,
+    AbstractFormField,
+    AbstractEmailForm,
+    AbstractFormField,
+    AbstractFormSubmission,
+)
 from esite.bifrost.helpers import register_streamfield_block
 
 
 class Connector(models.Model):
-    from ..ops_scpages.models import OpsScpagesPage
+    from ..ops_scpages.models import OpsScpagePage
 
     name = models.CharField(null=True, max_length=255)
+    description = models.CharField(null=True, blank=True, max_length=255)
     domain = models.CharField(null=True, max_length=255)
     token = models.CharField(
         null=True,
@@ -48,8 +58,11 @@ class Connector(models.Model):
         max_length=255,
         help_text="Warning! Changing the token affects the connection to all endpoints.",
     )
-    company_page = ParentalKey(
-        OpsScpagesPage,
+    created = models.DateTimeField(null=True, auto_now_add=True)
+    updated = models.DateTimeField(null=True, auto_now=True)
+    active = models.BooleanField(default=True)
+    company_page = models.ForeignKey(
+        OpsScpagePage,
         on_delete=models.CASCADE,
         related_name="conntector_scp_page",
         null=True,
@@ -93,6 +106,7 @@ class Connector(models.Model):
         MultiFieldPanel(
             [
                 FieldPanel("name"),
+                FieldPanel("description"),
                 FieldPanel("domain"),
                 FieldPanel("token"),
                 FieldPanel("company_page"),
@@ -118,19 +132,93 @@ class Connector(models.Model):
         ),
     ]
 
-    def save(self, *args, **kwargs):
-        if not self.token:
-            self.token = secrets.token_hex()
-
-        super(Connector, self).save(*args, **kwargs)
-
     def __str__(self):
         return f"{self.name} ({self.domain})"
 
 
-# class ConnectorForm(AbstractEmailForm):
-#     # Only allow creating HomePages at the root level
-#     parent_page_types = ["OpsPipelinesPage"]
+class ConnectorFormField(AbstractFormField):
+    page = ParentalKey(
+        "ConnectorFormPage", on_delete=models.CASCADE, related_name="form_fields",
+    )
+
+
+class ConnectorFormPage(AbstractEmailForm):
+    # Only allow creating HomePages at the root level
+    parent_page_types = ["wagtailcore.Page"]
+
+    # When creating a new Form page in Wagtail
+    head = models.CharField(null=True, blank=False, max_length=255)
+    description = models.CharField(null=True, blank=False, max_length=255)
+
+    graphql_fields = [
+        GraphQLString("head"),
+        GraphQLString("description"),
+    ]
+
+    content_panels = AbstractEmailForm.content_panels + [
+        MultiFieldPanel(
+            [
+                FieldPanel("head", classname="full title"),
+                FieldPanel("description", classname="full"),
+            ],
+            heading="content",
+        ),
+        MultiFieldPanel(
+            [
+                FieldRowPanel(
+                    [
+                        FieldPanel("from_address", classname="col6"),
+                        FieldPanel("to_address", classname="col6"),
+                    ]
+                ),
+                FieldPanel("subject"),
+            ],
+            heading="Email Settings",
+        ),
+        MultiFieldPanel(
+            [InlinePanel("form_fields", label="Form fields")], heading="data",
+        ),
+    ]
+
+    def get_submission_class(self):
+        return ConnectorFormSubmission
+
+    # Called when pipeline data is pushed
+    def send_mail(self, form):
+        addresses = [x.strip() for x in self.to_address.split(",")]
+
+        emailheader = "New SNEK Connector Activity"
+
+        content = []
+        for field in form:
+            value = field.value()
+            if isinstance(value, list):
+                value = ", ".join(value)
+            content.append("{}: {}".format(field.label, value))
+        content = "\n".join(content)
+
+        content += "\n\nMade with ❤ by a tiny SNEK"
+
+        # emailfooter = '<style>@keyframes pulse { 10% { color: red; } }</style><p>Made with <span style="width: 20px; height: 1em; color:#dd0000; animation: pulse 1s infinite;">&#x2764;</span> by <a style="color: lightgrey" href="https://www.aichner-christian.com" target="_blank">Werbeagentur Christian Aichner</a></p>'
+
+        # html_message = f"{emailheader}\n\n{content}\n\n{emailfooter}"
+
+        send_mail(
+            self.subject, f"{emailheader}\n\n{content}", addresses, self.from_address
+        )
+
+    def process_form_submission(self, form):
+
+        git = (form.cleaned_data["git"],)
+        log = (form.cleaned_data["log"],)
+
+        print("PROCESSING")
+        print(git, log)
+        # Connector.objects.get
+
+
+class ConnectorFormSubmission(AbstractFormSubmission):
+    pass
 
 
 # SPDX-License-Identifier: (EUPL-1.2)
