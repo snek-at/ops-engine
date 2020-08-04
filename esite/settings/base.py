@@ -296,6 +296,10 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
     },
 }
 
+# MongoDB
+MONGO_HOST = "localhost"
+MONGO_PORT = 27017
+
 # Default size of the pagination used on the front-end
 DEFAULT_PER_PAGE = 10
 
