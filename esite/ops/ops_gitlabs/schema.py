@@ -78,7 +78,7 @@ class UpdateGitlab(graphene.Mutation):
         privilegies_mode = graphene.String(required=False)
 
     @superuser_required
-    def mutate(self, info, id, company_page_slug, **kwargs):
+    def mutate(self, info, id, company_page_slug=None, **kwargs):
         from ..ops_scpages.models import OpsScpagePage
 
         page = OpsScpagePage.objects.filter(slug=company_page_slug).first()
@@ -89,8 +89,10 @@ class UpdateGitlab(graphene.Mutation):
             if company_page_slug:
                 kwargs["company_page"] = None
 
-        if kwargs["gitlab_token"]:
-            kwargs["token"] = kwargs["gitlab_token"]
+        print(kwargs)
+
+        if kwargs.get("gitlab_token"):
+            kwargs["token"] = kwargs.get("gitlab_token")
             kwargs.pop("gitlab_token")
 
         Gitlab.objects.filter(id=id).update(**kwargs)

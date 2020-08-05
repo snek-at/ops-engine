@@ -84,10 +84,10 @@ class UpdateConnector(graphene.Mutation):
         active = graphene.Boolean(required=False)
         privilegies_mode = graphene.String(required=False)
         share_mode = graphene.String(required=False)
-        settings = GenericScalar()
+        settings = GenericScalar(required=False)
 
     @superuser_required
-    def mutate(self, info, id, company_page_slug, settings, **kwargs):
+    def mutate(self, info, id, company_page_slug=None, settings={}, **kwargs):
         from ..ops_scpages.models import OpsScpagePage
 
         page = OpsScpagePage.objects.filter(slug=company_page_slug).first()
@@ -98,7 +98,7 @@ class UpdateConnector(graphene.Mutation):
             if company_page_slug:
                 kwargs["company_page"] = None
 
-        if kwargs["connector_token"]:
+        if kwargs.get("connector_token"):
             kwargs["token"] = kwargs["connector_token"]
             kwargs.pop("connector_token")
 
