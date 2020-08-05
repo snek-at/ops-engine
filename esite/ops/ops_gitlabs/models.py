@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
 from wagtail.core.models import Page
 from wagtail.core import fields
 from wagtail.core import blocks
@@ -21,7 +22,7 @@ from wagtail.snippets.models import register_snippet
 from modelcluster.fields import ParentalKey
 
 import uuid
-
+import json
 from esite.bifrost.models import (
     GraphQLInt,
     GraphQLBoolean,
@@ -43,7 +44,7 @@ class Gitlab(models.Model):
 
     name = models.CharField(null=True, max_length=255)
     description = models.CharField(null=True, blank=True, max_length=255)
-    domain = models.CharField(null=True, max_length=255)
+    url = models.URLField(null=True, max_length=255)
     token = models.CharField(
         null=True,
         max_length=255,
@@ -71,7 +72,7 @@ class Gitlab(models.Model):
             [
                 FieldPanel("name"),
                 FieldPanel("description"),
-                FieldPanel("domain"),
+                FieldPanel("url"),
                 FieldPanel("token"),
                 FieldPanel("company_page"),
             ],
@@ -80,8 +81,54 @@ class Gitlab(models.Model):
         MultiFieldPanel([FieldPanel("privilegies_mode"),], heading="Settings",),
     ]
 
+    def analyse_gitlab(self):
+        from ...core.services import mongodb
+        from .services import GitLabScraper
+
+        print(self.url, self.token)
+        gls = GitLabScraper(self.token)
+
+        # > Get all projects where token user is member of
+        projects = []
+
+        for _projects in gls.gen_request(
+            f"{self.url}/projects", optional_parameter="membership=true"
+        ):
+            # print(_projects)
+            # > Get all members of each project
+            for project in _projects:
+                print("PROJECT", project)
+                project["members"] = []
+                project["events"] = []
+
+                project_link = project["_links"]["self"]
+                member_link = project["_links"]["members"]
+                event_link = project["_links"]["events"]
+
+                if member_link:
+                    for _members in gls.gen_request(member_link):
+                        project["members"] += _members
+                if event_link:
+                    for _events in gls.gen_request(event_link):
+                        project["events"] += _events
+
+                project["languages"] = next(
+                    gls.gen_request(f"{project_link}/languages")
+                )
+                projects.append(project)
+
+        # enter the data here
+        mongodb.get_collection("gitlab").update(
+            {"connector_id": self.id},
+            {
+                "company_page_slug": f"{self.company_page.slug}",
+                "connector_id": self.id,
+                "projects": projects,
+            },
+        )
+
     def __str__(self):
-        return f"{self.name} ({self.domain})"
+        return f"{self.name} ({self.url})"
 
 
 # SPDX-License-Identifier: (EUPL-1.2)
