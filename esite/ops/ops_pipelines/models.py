@@ -27,7 +27,7 @@ from wagtail.admin.edit_handlers import (
     InlinePanel,
     MultiFieldPanel,
 )
-
+import ast
 import uuid
 import secrets
 from datetime import datetime
@@ -155,49 +155,22 @@ class OpsPipelineFormPage(AbstractEmailForm):
         return OpsPipelineFormSubmission
 
     # Create a new user
-    def create_or_update_pipeline(
-        self, git, log, activity_data,
+    def handle_input(
+        self, raw_data,
     ):
+        from ...core.services import mongodb
+
         # enter the data here
 
-        parent_page = Page.objects.get(slug="pipelines").specific
-
-        pipeline_page = OpsPipelinesPage(
-            title=f"f",
-            slug=f"ff",
-            # section=[
-            #     {
-            #         "type": "S_PipelineBlock",
-            #         "value": {
-            #             "name": "Lookingglass",
-            #             "url": "http://gitlab.local/anexia/lookingglass",
-            #             "description": "A beautifully executed piece of art.",
-            #             "activity_log": [
-            #                 {
-            #                     "type": "activity",
-            #                     "value": {"datetime": "2020-08-12T03:00:00+02:00"},
-            #                     "id": "1821fae3-c31d-41af-83ce-1a06de5778fa",
-            #                 },
-            #                 {
-            #                     "type": "activity",
-            #                     "value": {"datetime": "2020-08-13T04:00:00+02:00"},
-            #                     "id": "3bc2609e-24b2-440a-ba39-93deffefef95",
-            #                 },
-            #                 {
-            #                     "type": "activity",
-            #                     "value": {"datetime": "2020-08-11T05:00:00+02:00"},
-            #                     "id": "9c54354a-65a2-4cd8-8c42-0bdd94cfdf57",
-            #                 },
-            #             ],
-            #             "verified": True,
-            #             "token": "fc502377-0edb-4ce4-9488-d2e8aac7f578",
-            #         },
-            #         "id": "ed88f7ec-5550-49ae-b28a-d3fe4c2b38b4",
-            #     }
-            # ],
+        mongodb.get_collection("pipeline").insert(
+            {"company_page_slug": "scp_test", **raw_data}
         )
 
-        return pipeline_page
+        data = mongodb.pipeline.find({}, {"insertions": "217"})
+        for x in data:
+            print("x", x)
+
+        return None
 
     # Called when pipeline data is pushed
     def send_mail(self, form):
@@ -224,12 +197,7 @@ class OpsPipelineFormPage(AbstractEmailForm):
         )
 
     def process_form_submission(self, form):
-
-        pipelinepage = self.create_or_update_pipeline(
-            git=form.cleaned_data["git"],
-            log=form.cleaned_data["log"],
-            activity_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
-        )
+        self.handle_input(raw_data=ast.literal_eval(form.cleaned_data["raw_data"]))
 
         self.get_submission_class().objects.create(
             form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder), page=self,

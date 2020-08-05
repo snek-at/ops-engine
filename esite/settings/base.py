@@ -35,9 +35,7 @@ INSTALLED_APPS = [
     "esite.navigation",
     "esite.utils",
     "esite.ops.ops_connectors",
-    "esite.ops.ops_dashboard",
     "esite.ops.ops_gitlabs",
-    "esite.ops.ops_permissions",
     "esite.ops.ops_pipelines",
     "esite.ops.ops_scpages",
     # Django core apps
@@ -297,8 +295,11 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
 }
 
 # MongoDB
-MONGO_HOST = "localhost"
+MONGO_HOST = "snekdev.sex12.azure.mongodb.net"
 MONGO_PORT = 27017
+MONGO_USER = "snekman"
+MONGO_PASSWORD = "8iTIrcAO0wxBmgsZ"
+
 
 # Default size of the pagination used on the front-end
 DEFAULT_PER_PAGE = 10
