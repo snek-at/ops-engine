@@ -103,14 +103,13 @@ class Gitlab(models.Model):
 
                 project_link = project["_links"]["self"]
                 member_link = project["_links"]["members"]
-                event_link = project["_links"]["events"]
 
                 if member_link:
                     for _members in gls.gen_request(member_link):
                         project["members"] += _members
-                if event_link:
-                    for _events in gls.gen_request(event_link):
-                        project["events"] += _events
+
+                for _events in gls.gen_request(f"{project_link}/repository/commits"):
+                    project["events"] += _events
 
                 project["languages"] = next(
                     gls.gen_request(f"{project_link}/languages")
@@ -118,14 +117,16 @@ class Gitlab(models.Model):
                 projects.append(project)
 
         # enter the data here
-        mongodb.get_collection("gitlab").update(
-            {"connector_id": self.id},
-            {
-                "company_page_slug": f"{self.company_page.slug}",
-                "connector_id": self.id,
-                "projects": projects,
-            },
-        )
+        if self.company_page:
+            mongodb.get_collection("gitlab").update(
+                {"gitlab_id": self.id},
+                {
+                    "company_page_slug": f"{self.company_page.slug}",
+                    "gitlab_id": self.id,
+                    "projects": projects,
+                },
+                upsert=True,
+            )
 
     def __str__(self):
         return f"{self.name} ({self.url})"

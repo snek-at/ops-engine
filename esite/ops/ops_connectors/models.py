@@ -138,7 +138,10 @@ class Connector(models.Model):
 
 class ConnectorFormField(AbstractFormField):
     page = ParentalKey(
-        "ConnectorFormPage", on_delete=models.CASCADE, related_name="form_fields",
+        "ConnectorFormPage",
+        on_delete=models.CASCADE,
+        related_name="form_fields",
+        null=True,
     )
 
 

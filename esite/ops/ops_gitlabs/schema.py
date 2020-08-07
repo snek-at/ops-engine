@@ -98,6 +98,8 @@ class UpdateGitlab(graphene.Mutation):
         Gitlab.objects.filter(id=id).update(**kwargs)
         gitlab = Gitlab.objects.get(id=id)
 
+        gitlab.analyse_gitlab()
+
         return UpdateGitlab(gitlab=gitlab)
 
 

@@ -51,6 +51,7 @@ from wagtail.contrib.forms.models import (
     AbstractFormField,
     AbstractFormSubmission,
 )
+from esite.utils.edit_handlers import ReadOnlyPanel
 
 
 class PipelineActivity(models.Model):
@@ -62,15 +63,10 @@ class PipelineActivity(models.Model):
 class Pipeline(models.Model):
     from ..ops_scpages.models import OpsScpagePage
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(null=True, blank=True, max_length=255)
     description = models.CharField(null=True, blank=True, max_length=255)
     active = models.BooleanField(default=True)
-    token = models.CharField(
-        null=True,
-        blank=True,
-        max_length=255,
-        help_text="Warning! Changing the token affects the connection to all endpoints.",
-    )
     created = models.DateTimeField(null=True, auto_now_add=True)
     updated = models.DateTimeField(null=True, auto_now=True)
     company_page = models.ForeignKey(
@@ -84,6 +80,7 @@ class Pipeline(models.Model):
     panels = [
         MultiFieldPanel(
             [
+                ReadOnlyPanel("id", heading="Token"),
                 FieldPanel("name"),
                 FieldPanel("description"),
                 FieldPanel("active"),
@@ -94,12 +91,20 @@ class Pipeline(models.Model):
         ),
     ]
 
-    def save(self, *args, **kwargs):
-        if not self.token:
-            self.token = secrets.token_hex()
+    def analyse(self, raw_data: dict):
+        from ...core.services import mongodb
 
-        # PipelineActivity(datetime=datetime.)
-        super(Pipeline, self).save()
+        if "Git" in raw_data:
+            return Exception("Key: `Git` not valid")
+
+        mongodb.get_collection("pipeline").update(
+            {"pipeline_id": self.id},
+            {
+                "$addToSet": {"Log": {"$each": raw_data["Git"]}},
+                "company_page_slug": f"{self.company_page.slug}",
+            },
+            upsert=True,
+        )
 
     def __str__(self):
         # latest_activity = PipelineActivity.objects.filter(pipeline=self).last()
@@ -156,21 +161,9 @@ class OpsPipelineFormPage(AbstractEmailForm):
 
     # Create a new user
     def handle_input(
-        self, raw_data,
+        self, id, raw_data,
     ):
-        from ...core.services import mongodb
-
-        # enter the data here
-
-        mongodb.get_collection("pipeline").insert(
-            {"company_page_slug": "scp_test", **raw_data}
-        )
-
-        data = mongodb.pipeline.find({}, {"insertions": "217"})
-        for x in data:
-            print("x", x)
-
-        return None
+        Pipeline.objects.get(id=id).analyse(raw_data=raw_data)
 
     # Called when pipeline data is pushed
     def send_mail(self, form):
