@@ -2,7 +2,7 @@ def updatePages():
     from .models import OpsScpagePage
 
     for page in OpsScpagePage.objects.all():
-        page.generateContent()
+        page.generate()
 
     # tmp = mongodb.get_collection("gitlab").aggregate(
     #     [
