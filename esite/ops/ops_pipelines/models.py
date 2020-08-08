@@ -54,12 +54,6 @@ from wagtail.contrib.forms.models import (
 from esite.utils.edit_handlers import ReadOnlyPanel
 
 
-class PipelineActivity(models.Model):
-    datetime = models.DateTimeField(null=True)
-    # data = models.Da
-    pipeline = models.ForeignKey("Pipeline", on_delete=models.CASCADE)
-
-
 class Pipeline(models.Model):
     from ..ops_scpages.models import OpsScpagePage
 
@@ -84,7 +78,6 @@ class Pipeline(models.Model):
                 FieldPanel("name"),
                 FieldPanel("description"),
                 FieldPanel("active"),
-                FieldPanel("token"),
                 FieldPanel("company_page"),
             ],
             heading="General",
