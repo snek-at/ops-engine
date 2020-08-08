@@ -3,11 +3,25 @@ from modelcluster.models import ClusterableModel, ParentalManyToManyField, Paren
 from wagtail.core.models import Page
 from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, InlinePanel
 
+from esite.bifrost.models import (
+    GraphQLInt,
+    GraphQLBoolean,
+    GraphQLString,
+    GraphQLFloat,
+    GraphQLImage,
+    GraphQLDocument,
+    GraphQLSnippet,
+    GraphQLEmbed,
+    GraphQLStreamfield,
+    GraphQLForeignKey,
+    GraphQLCollection,
+)
+
 
 class ContributionFeed(ClusterableModel):
-    # page = ParentalKey(
-    #     "OpsScpagePage", related_name="epfeed", on_delete=models.SET_NULL, null=True
-    # )
+    page = ParentalKey(
+        "OpsScpagePage", related_name="epfeed", on_delete=models.SET_NULL, null=True
+    )
     type = models.CharField(null=True, max_length=255)
     cid = models.CharField(null=True, max_length=255)
     datetime = models.DateTimeField(null=True)
@@ -16,13 +30,18 @@ class ContributionFeed(ClusterableModel):
         "ContributionFile", related_name="files", null=True, blank=True
     )
 
-    # panels = [
-    #     InlinePanel("epfeed2", label="Related links"),
-    # ]
+    graphql_fields = [
+        GraphQLForeignKey("page", content_type="ops_scpages.Contributor"),
+        GraphQLString("type"),
+        GraphQLString("cid"),
+        GraphQLString("datetime"),
+        GraphQLString("message"),
+        GraphQLCollection(GraphQLForeignKey, "files", "ops_scpages.ContributionFile"),
+    ]
 
     def __str__(self):
-        # (commit) - datetime #page.slug
-        return f"({self.type}) {self.datetime}"
+        # (commit) cid
+        return f"({self.type}) {self.cid}"
 
 
 class ContributionFile(models.Model):
@@ -33,6 +52,14 @@ class ContributionFile(models.Model):
     deletions = models.IntegerField(null=True)
     path = models.CharField(null=True, max_length=255)
     raw_changes = models.TextField(null=True, max_length=255)
+
+    graphql_fields = [
+        GraphQLForeignKey("page", content_type="ops_scpages.Contributor"),
+        GraphQLString("insertions"),
+        GraphQLString("deletions"),
+        GraphQLString("path"),
+        GraphQLString("raw_changes"),
+    ]
 
     def __str__(self):
         # /src/test.py (+100/-200)
@@ -45,11 +72,24 @@ class CodeLanguageStatistic(models.Model):
     insertions = models.IntegerField(null=True, default="Unkown")
     deletions = models.IntegerField(null=True, default="Unkown")
 
+    graphql_fields = [
+        GraphQLString("name"),
+        GraphQLString("color"),
+        GraphQLString("insertions"),
+        GraphQLString("deletions"),
+    ]
+
 
 class CodeTransitionStatistic(models.Model):
     insertions = models.IntegerField(null=True, default="Unkown")
     deletions = models.IntegerField(null=True, default="Unkown")
     datetime = models.DateTimeField(null=True)
+
+    graphql_fields = [
+        GraphQLString("insertions"),
+        GraphQLString("deletions"),
+        GraphQLString("datetime"),
+    ]
 
 
 class Contributor(ClusterableModel):
@@ -73,6 +113,24 @@ class Contributor(ClusterableModel):
         "CodeTransitionStatistic", related_name="contributor_codetransition", blank=True
     )
 
+    graphql_fields = [
+        GraphQLForeignKey("page", content_type="ops_scpages.Contributor"),
+        GraphQLString("name"),
+        GraphQLString("username"),
+        GraphQLBoolean("active"),
+        GraphQLImage("avatar"),
+        GraphQLCollection(GraphQLForeignKey, "feed", "ops_scpages.ContributionFeed"),
+        GraphQLCollection(
+            GraphQLForeignKey, "codelanguages", "ops_scpages.CodeLanguageStatistic"
+        ),
+        GraphQLCollection(
+            GraphQLForeignKey, "codetransition", "ops_scpages.CodeTransitionStatistic"
+        ),
+    ]
+
+    def __str__(self):
+        return f"{self.username}"
+
 
 class Project(ClusterableModel):
     page = ParentalKey(
@@ -82,12 +140,16 @@ class Project(ClusterableModel):
         null=True,
     )
 
-    name = models.CharField(null=True, max_length=255, default="Unkown")
-    url = models.URLField(null=True, max_length=255, default="Unkown")
-    description = models.TextField(null=True, default="Unkown")
-    owner_name = models.URLField(null=True, max_length=255, default="Unkown")
-    owner_username = models.URLField(null=True, max_length=255, default="Unkown")
-    owner_email = models.EmailField(null=True, default="Unkown")
+    name = models.CharField(null=True, blank=True, max_length=255, default="Unkown")
+    url = models.URLField(null=True, blank=True, max_length=255, default="Unkown")
+    description = models.TextField(null=True, blank=True, default="Unkown")
+    owner_name = models.CharField(
+        null=True, blank=True, max_length=255, default="Unkown"
+    )
+    owner_username = models.CharField(
+        null=True, blank=True, max_length=255, default="Unkown"
+    )
+    owner_email = models.EmailField(null=True, blank=True, default="Unkown")
     contributors = ParentalManyToManyField(
         "Contributor", related_name="project_contributor", blank=True
     )
@@ -97,9 +159,26 @@ class Project(ClusterableModel):
     codelanguages = ParentalManyToManyField(
         "CodeLanguageStatistic", related_name="project_codelanguages", blank=True
     )
-    codetransition = ParentalManyToManyField(
-        "CodeTransitionStatistic", related_name="project_codetransition", blank=True
-    )
+
+    graphql_fields = [
+        GraphQLForeignKey("page", content_type="ops_scpages.Project"),
+        GraphQLString("name"),
+        GraphQLString("url"),
+        GraphQLString("description"),
+        GraphQLString("owner_name"),
+        GraphQLString("owner_username"),
+        GraphQLString("owner_email"),
+        GraphQLCollection(GraphQLForeignKey, "feed", "ops_scpages.ContributionFeed"),
+        GraphQLCollection(GraphQLForeignKey, "contributors", "ops_scpages.Contributor"),
+        GraphQLCollection(
+            GraphQLForeignKey, "codelanguages", "ops_scpages.CodeLanguageStatistic"
+        ),
+    ]
+
+    # panel = [InlinePanel("transition_project")]
+    # codetransition = ParentalManyToManyField(
+    #     "CodeTransitionStatistic", related_name="project_codetransition", blank=True
+    # )
 
 
 class OpsScpagesPage(Page):
@@ -111,11 +190,22 @@ class OpsScpagePage(Page):
     # feed = ParentalKey(
     #     "ContributionFeed", related_name="epfeed", on_delete=models.SET_NULL, null=True
     # )
+    from ...utils.edit_handlers import TestPanel
 
     content_panels = Page.content_panels + [
         # InlinePanel("epfeed", label="Contributions", heading="Contribution Feed"),
         InlinePanel("opsprojects", label="Project", heading="Projects"),
+        # TestPanel("opsprojects")
         # InlinePanel("epcontributor", label="Contributor", heading="Contributors"),
+    ]
+
+    graphql_fields = [
+        # GraphQLForeignKey("opsprojects", "ops_scpages.Project"),
+        GraphQLCollection(GraphQLForeignKey, "opsprojects", "ops_scpages.Project"),
+        GraphQLCollection(
+            GraphQLForeignKey, "epcontributor", "ops_scpages.Contributor"
+        ),
+        GraphQLCollection(GraphQLForeignKey, "epfeed", "ops_scpages.ContributionFeed"),
     ]
 
     def generate(self):
@@ -161,9 +251,10 @@ class OpsScpagePage(Page):
                 },
             ]
         )
-        # Project.objects.all().delete()
-        # ContributionFeed.objects.all().delete()
-        # ContributionFile.objects.all().delete()
+        Project.objects.all().delete()
+        Contributor.objects.all().delete()
+        ContributionFeed.objects.all().delete()
+        ContributionFile.objects.all().delete()
         for project in data:
             p, created = Project.objects.get_or_create(
                 page=self,
@@ -178,7 +269,7 @@ class OpsScpagePage(Page):
             for event in project["events"]:
 
                 c, created = ContributionFeed.objects.get_or_create(
-                    # page=self,
+                    page=self,
                     type="commit",
                     datetime=event["created_at"],
                     cid=event["id"],
@@ -200,6 +291,7 @@ class OpsScpagePage(Page):
                             path=file["path"],
                             raw_changes=file["raw_changes"],
                         )
+
                         c.files.add(cf)
 
                         cts, created = CodeTransitionStatistic.objects.get_or_create(
@@ -214,6 +306,7 @@ class OpsScpagePage(Page):
                     pass
 
                 con.feed.add(c)
+                p.contributors.add(con)
                 p.feed.add(c)
 
             p.save()
