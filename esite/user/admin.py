@@ -5,17 +5,13 @@ from wagtail.contrib.modeladmin.options import (
     modeladmin_register,
 )
 
-from esite.person.admin import PersonAdmin
-from esite.ops.enterprise.admin import EnterpriseAdmin
-from esite.registration.admin import RegistrationAdmin
-from esite.profile.admin import ProfileAdmin
 
 # Register your user related models here.
 
 
 class UserAdmin(ModelAdmin):
     model = get_user_model()
-    menu_label = "Person"
+    menu_label = "User"
     menu_icon = "user"
     menu_order = 290
     add_to_settings_menu = False
@@ -32,10 +28,10 @@ class UserManagementAdmin(ModelAdminGroup):
     menu_order = 110
     add_to_settings_menu = False
     exclude_from_explorer = False
-    items = (ProfileAdmin, PersonAdmin, EnterpriseAdmin, RegistrationAdmin)
+    items = UserAdmin
 
 
-modeladmin_register(UserManagementAdmin)
+# modeladmin_register(UserManagementAdmin)
 
 # SPDX-License-Identifier: (EUPL-1.2)
 # Copyright © 2019-2020 Simon Prast

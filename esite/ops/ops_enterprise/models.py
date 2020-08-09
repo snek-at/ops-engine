@@ -96,7 +96,10 @@ class Enterprise(get_user_model()):
 # > Models
 class ContributionFeed(ClusterableModel):
     page = ParentalKey(
-        "OpsScpagePage", related_name="epfeed", on_delete=models.SET_NULL, null=True
+        "EnterpriseFormPage",
+        related_name="epfeed",
+        on_delete=models.SET_NULL,
+        null=True,
     )
     type = models.CharField(null=True, max_length=255)
     cid = models.CharField(null=True, max_length=255)
@@ -107,12 +110,14 @@ class ContributionFeed(ClusterableModel):
     )
 
     graphql_fields = [
-        GraphQLForeignKey("page", content_type="ops_scpages.Contributor"),
+        GraphQLForeignKey("page", content_type="ops_enterprise.Contributor"),
         GraphQLString("type"),
         GraphQLString("cid"),
         GraphQLString("datetime"),
         GraphQLString("message"),
-        GraphQLCollection(GraphQLForeignKey, "files", "ops_scpages.ContributionFile"),
+        GraphQLCollection(
+            GraphQLForeignKey, "files", "ops_enterprise.ContributionFile"
+        ),
     ]
 
     def __str__(self):
@@ -122,7 +127,10 @@ class ContributionFeed(ClusterableModel):
 
 class ContributionFile(models.Model):
     feed = ParentalKey(
-        "OpsScpagePage", related_name="epfeed2", on_delete=models.SET_NULL, null=True
+        "EnterpriseFormPage",
+        related_name="epfeed2",
+        on_delete=models.SET_NULL,
+        null=True,
     )
     insertions = models.IntegerField(null=True)
     deletions = models.IntegerField(null=True)
@@ -130,7 +138,7 @@ class ContributionFile(models.Model):
     raw_changes = models.TextField(null=True, max_length=255)
 
     graphql_fields = [
-        GraphQLForeignKey("page", content_type="ops_scpages.Contributor"),
+        GraphQLForeignKey("page", content_type="ops_enterprise.Contributor"),
         GraphQLString("insertions"),
         GraphQLString("deletions"),
         GraphQLString("path"),
@@ -170,7 +178,7 @@ class CodeTransitionStatistic(models.Model):
 
 class Contributor(ClusterableModel):
     page = ParentalKey(
-        "OpsScpagePage",
+        "EnterpriseFormPage",
         related_name="epcontributor",
         on_delete=models.SET_NULL,
         null=True,
@@ -190,17 +198,19 @@ class Contributor(ClusterableModel):
     )
 
     graphql_fields = [
-        GraphQLForeignKey("page", content_type="ops_scpages.Contributor"),
+        GraphQLForeignKey("page", content_type="ops_enterprise.Contributor"),
         GraphQLString("name"),
         GraphQLString("username"),
         GraphQLBoolean("active"),
         GraphQLImage("avatar"),
-        GraphQLCollection(GraphQLForeignKey, "feed", "ops_scpages.ContributionFeed"),
+        GraphQLCollection(GraphQLForeignKey, "feed", "ops_enterprise.ContributionFeed"),
         GraphQLCollection(
-            GraphQLForeignKey, "codelanguages", "ops_scpages.CodeLanguageStatistic"
+            GraphQLForeignKey, "codelanguages", "ops_enterprise.CodeLanguageStatistic"
         ),
         GraphQLCollection(
-            GraphQLForeignKey, "codetransition", "ops_scpages.CodeTransitionStatistic"
+            GraphQLForeignKey,
+            "codetransition",
+            "ops_enterprise.CodeTransitionStatistic",
         ),
     ]
 
@@ -210,7 +220,7 @@ class Contributor(ClusterableModel):
 
 class Project(ClusterableModel):
     page = ParentalKey(
-        "OpsScpagePage",
+        "EnterpriseFormPage",
         related_name="opsprojects",
         on_delete=models.SET_NULL,
         null=True,
@@ -240,20 +250,22 @@ class Project(ClusterableModel):
     )
 
     graphql_fields = [
-        GraphQLForeignKey("page", content_type="ops_scpages.Project"),
+        GraphQLForeignKey("page", content_type="ops_enterprise.Project"),
         GraphQLString("name"),
         GraphQLString("url"),
         GraphQLString("description"),
         GraphQLString("owner_name"),
         GraphQLString("owner_username"),
         GraphQLString("owner_email"),
-        GraphQLCollection(GraphQLForeignKey, "feed", "ops_scpages.ContributionFeed"),
-        GraphQLCollection(GraphQLForeignKey, "contributors", "ops_scpages.Contributor"),
+        GraphQLCollection(GraphQLForeignKey, "feed", "ops_enterprise.ContributionFeed"),
         GraphQLCollection(
-            GraphQLForeignKey, "codelanguages", "ops_scpages.CodeLanguageStatistic"
+            GraphQLForeignKey, "contributors", "ops_enterprise.Contributor"
         ),
         GraphQLCollection(
-            GraphQLForeignKey, "codetransition", "ops_scpages.CodeLanguageStatistic"
+            GraphQLForeignKey, "codelanguages", "ops_enterprise.CodeLanguageStatistic"
+        ),
+        GraphQLCollection(
+            GraphQLForeignKey, "codetransition", "ops_enterprise.CodeLanguageStatistic"
         ),
     ]
 
@@ -289,12 +301,14 @@ class EnterpriseFormPage(BaseEmailFormPage):
         # InlinePanel("epcontributor", label="Contributor", heading="Contributors"),
     ]
     graphql_fields = [
-        # GraphQLForeignKey("opsprojects", "ops_scpages.Project"),
-        GraphQLCollection(GraphQLForeignKey, "opsprojects", "ops_scpages.Project"),
+        # GraphQLForeignKey("opsprojects", "ops_enterprise.Project"),
+        GraphQLCollection(GraphQLForeignKey, "opsprojects", "ops_enterprise.Project"),
         GraphQLCollection(
-            GraphQLForeignKey, "epcontributor", "ops_scpages.Contributor"
+            GraphQLForeignKey, "epcontributor", "ops_enterprise.Contributor"
         ),
-        GraphQLCollection(GraphQLForeignKey, "epfeed", "ops_scpages.ContributionFeed"),
+        GraphQLCollection(
+            GraphQLForeignKey, "epfeed", "ops_enterprise.ContributionFeed"
+        ),
     ]
     # Users
 
@@ -422,6 +436,113 @@ class EnterpriseFormPage(BaseEmailFormPage):
             ),
         ]
     )
+
+    def generate(self):
+        from ...core.services import mongodb
+
+        data = mongodb.get_collection("gitlab").aggregate(
+            [
+                {"$match": {"enterprise_page_slug": f"{self.slug}"}},
+                {"$unwind": "$projects"},
+                {"$unwind": "$projects.events"},
+                {
+                    "$lookup": {
+                        "from": "pipeline",
+                        "let": {"commit_id": "$projects.events.id"},
+                        "pipeline": [
+                            {"$unwind": "$Log"},
+                            {
+                                "$match": {
+                                    "$expr": {"$eq": ["$$commit_id", "$Log.commit"]},
+                                }
+                            },
+                        ],
+                        "as": "projects.events.asset",
+                    }
+                },
+                {
+                    "$unwind": {
+                        "path": "$projects.events.asset",
+                        "preserveNullAndEmptyArrays": True,
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": "$projects.id",
+                        "name": {"$first": "$projects.name"},
+                        "url": {"$first": "$projects.http_url_to_repo"},
+                        "description": {"$first": "$projects.description"},
+                        "maintainer_name": {"$first": "$projects.owner.name"},
+                        "maintainer_username": {"$first": "$projects.owner.username"},
+                        "maintainer_email": {"$first": "$projects.owner.email"},
+                        "events": {"$push": "$projects.events"},
+                    }
+                },
+            ]
+        )
+        Project.objects.all().delete()
+        Contributor.objects.all().delete()
+        ContributionFeed.objects.all().delete()
+        ContributionFile.objects.all().delete()
+        for project in data:
+            p, created = Project.objects.get_or_create(
+                page=self,
+                name=project["name"],
+                url=project["url"],
+                description=project["description"],
+                owner_name=project["maintainer_name"],
+                owner_username=project["maintainer_username"],
+                owner_email=project["maintainer_email"],
+            )
+
+            for event in project["events"]:
+
+                c, created = ContributionFeed.objects.get_or_create(
+                    page=self,
+                    type="commit",
+                    datetime=event["created_at"],
+                    cid=event["id"],
+                    message=event["message"],
+                )
+
+                con, created = Contributor.objects.get_or_create(
+                    page=self,
+                    name=event["committer_name"],
+                    username=event["committer_email"],
+                )
+
+                try:
+                    files = event["asset"]["Log"]["files"]
+                    for file in files:
+                        cf, created = ContributionFile.objects.get_or_create(
+                            insertions=file["insertions"],
+                            deletions=file["deletions"],
+                            path=file["path"],
+                            raw_changes=file["raw_changes"],
+                        )
+
+                        c.files.add(cf)
+
+                        cts, created = CodeTransitionStatistic.objects.get_or_create(
+                            datetime=c.datetime,
+                            insertions=cf.insertions,
+                            deletions=cf.deletions,
+                        )
+
+                        con.codetransition.add(cts)
+                        p.codetransition.add(cts)
+                except:
+                    pass
+
+                con.feed.add(c)
+
+                p.contributors.add(con)
+                p.feed.add(c)
+
+            p.save()
+
+        # a = ContributionFile.objects.all()
+        # print(a)
 
     def get_submission_class(self):
         return EnterpriseFormSubmission

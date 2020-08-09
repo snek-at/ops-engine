@@ -34,8 +34,8 @@ def create_schema():
     from .types.redirects import RedirectsQuery
 
     from .jwtauth.schema import ObtainJSONWebToken, ObtainPrivilegedJSONWebToken
-    import esite.ops.ops_connectors.schema as opsconn
-    import esite.ops.ops_pipelines.schema as opspipe
+    import esite.ops.ops_connector.schema as opsconn
+    import esite.ops.ops_pipeline.schema as opspipe
     import esite.ops.ops_gitlabs.schema as opsgitlab
 
     class Query(

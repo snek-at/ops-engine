@@ -16,7 +16,7 @@ class ConnectorForm(forms.ModelForm):
         fields = [
             "name",
             "domain",
-            "company_page",
+            "enterprise_page",
         ]
 
 

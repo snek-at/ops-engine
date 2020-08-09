@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     "esite.colorfield",
     "esite.ops.ops_enterprise",
     "esite.ops.ops_gitlab",
-    "esite.ops.ops_conenctor",
+    "esite.ops.ops_connector",
     "esite.ops.ops_pipeline",
     # Django core apps
     "django.contrib.admin",
@@ -165,16 +165,15 @@ GRAPHQL_JWT = {
 }
 
 BIFROST_APPS = {
-    "home": "",
     "utils": "",
     "documents": "",
     "images": "",
     "user": "",
     "navigation": "",
-    "ops_enterprise",
-    "ops_gitlab",
-    "ops_conenctor",
-    "ops_pipeline",
+    "ops_enterprise": "",
+    "ops_gitlab": "",
+    "ops_connector": "",
+    "ops_pipeline": "",
 }
 
 # > Password Validation

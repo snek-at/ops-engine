@@ -62,7 +62,7 @@ class Pipeline(models.Model):
     created = models.DateTimeField(null=True, auto_now_add=True)
     updated = models.DateTimeField(null=True, auto_now=True)
     enterprise_page = models.ForeignKey(
-        "ops_enterprise.OpsScpagePage",
+        "ops_enterprise.EnterpriseFormPage",
         on_delete=models.CASCADE,
         related_name="pipeline_scp_page",
         null=True,

@@ -30,16 +30,16 @@ class AddPipeline(graphene.Mutation):
         name = graphene.String(required=True)
         description = graphene.String(required=True)
         active = graphene.Boolean(required=False)
-        company_page_slug = graphene.String(required=True)
+        enterprise_page_slug = graphene.String(required=True)
 
     @superuser_required
-    def mutate(self, info, name, description, active, company_page_slug):
-        from ..ops_scpages.models import OpsScpagePage
+    def mutate(self, info, name, description, active, enterprise_page_slug):
+        from ..ops_enterprise.models import EnterpriseFormPage
 
-        page = OpsScpagePage.objects.get(slug=company_page_slug)
+        page = EnterpriseFormPage.objects.get(slug=enterprise_page_slug)
 
         pipeline = Pipeline(
-            name=name, description=description, active=active, company_page=page
+            name=name, description=description, active=active, enterprise_page=page
         )
 
         pipeline.save()
@@ -55,19 +55,19 @@ class UpdatePipeline(graphene.Mutation):
         name = graphene.String(required=False)
         description = graphene.String(required=False)
         active = graphene.Boolean(required=False)
-        company_page_slug = graphene.String(required=False)
+        enterprise_page_slug = graphene.String(required=False)
 
     @superuser_required
-    def mutate(self, info, id, company_page_slug=None, **kwargs):
-        from ..ops_scpages.models import OpsScpagePage
+    def mutate(self, info, id, enterprise_page_slug=None, **kwargs):
+        from ..ops_enterprise.models import EnterpriseFormPage
 
-        page = OpsScpagePage.objects.filter(slug=company_page_slug).first()
+        page = EnterpriseFormPage.objects.filter(slug=enterprise_page_slug).first()
 
         if page:
-            kwargs["company_page"] = page
+            kwargs["enterprise_page"] = page
         else:
-            if company_page_slug:
-                kwargs["company_page"] = None
+            if enterprise_page_slug:
+                kwargs["enterprise_page"] = None
 
         Pipeline.objects.filter(id=id).update(**kwargs)
         pipeline = Pipeline.objects.get(id=id)

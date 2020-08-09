@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import migrations
-from ...ops.ops_scpages.models import OpsScpagesPage
+from ...ops.ops_enterprise.models import EnterpriseIndex
 from wagtail.core.models import Page as Pagec
 
 
@@ -31,7 +31,7 @@ def create_homepage(apps, schema_editor):
     # )
 
     # Create homepage
-    opsPage = Page.objects.create(
+    enterprise_page = Page.objects.create(
         title="OPS Management",
         slug="ops-management",
         content_type=page_content_type,
@@ -41,22 +41,22 @@ def create_homepage(apps, schema_editor):
         url_path="/ops/",
     )
 
-    OpsScpagesPage.objects.create(
-        title="Company Pages",
-        slug="company-pages",
+    EnterpriseIndex.objects.create(
+        title="Enterprise Pages",
+        slug="enterprise-pages",
         path="00010002",
         depth=2,
         numchild=0,
-        url_path="/company-pages/",
+        url_path="/enterprise-pages/",
     )
 
     # Create default site
-    Site.objects.create(root_page_id=opsPage.id, is_default_site=True)
+    Site.objects.create(root_page_id=enterprise_page.id, is_default_site=True)
 
     # Site.objects.create(root_page_id=ops2Page.id, is_default_site=False)
 
     # page_content_type, created = ContentType.objects.get_or_create(
-    #     model="OpsScpagesPage", app_label="ops_scpages"
+    #     model="OpsScpagesPage", app_label="ops_enterprise"
     # )
 
     # b = Page.objects.create(
@@ -90,7 +90,7 @@ def remove_homepage(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("ops_scpages", "0001_initial"),
+        ("ops_enterprise", "0001_initial"),
     ]
 
     operations = [

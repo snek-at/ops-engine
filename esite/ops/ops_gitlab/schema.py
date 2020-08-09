@@ -31,7 +31,7 @@ class AddGitlab(graphene.Mutation):
         description = graphene.String(required=True)
         domain = graphene.String(required=True)
         gitlab_token = graphene.String(required=True)
-        company_page_slug = graphene.String(required=True)
+        enterprise_page_slug = graphene.String(required=True)
         active = graphene.Boolean(required=True)
         privilegies_mode = graphene.String(required=True)
 
@@ -43,19 +43,19 @@ class AddGitlab(graphene.Mutation):
         description,
         domain,
         gitlab_token,
-        company_page_slug,
+        enterprise_page_slug,
         privilegies_mode,
     ):
-        from ..ops_scpages.models import OpsScpagePage
+        from ..ops_enterprise.models import EnterpriseFormPage
 
-        page = OpsScpagePage.objects.get(slug=company_page_slug)
+        page = EnterpriseFormPage.objects.get(slug=enterprise_page_slug)
 
         gitlab = Gitlab(
             name=name,
             description=description,
             domain=domain,
             token=gitlab_token,
-            company_page=page,
+            enterprise_page=page,
             privilegies_mode=privilegies_mode,
         )
 
@@ -73,21 +73,21 @@ class UpdateGitlab(graphene.Mutation):
         description = graphene.String(required=False)
         domain = graphene.String(required=False)
         gitlab_token = graphene.String(required=False)
-        company_page_slug = graphene.String(required=False)
+        enterprise_page_slug = graphene.String(required=False)
         active = graphene.Boolean(required=False)
         privilegies_mode = graphene.String(required=False)
 
     @superuser_required
-    def mutate(self, info, id, company_page_slug=None, **kwargs):
-        from ..ops_scpages.models import OpsScpagePage
+    def mutate(self, info, id, enterprise_page_slug=None, **kwargs):
+        from ..ops_enterprise.models import EnterpriseFormPage
 
-        page = OpsScpagePage.objects.filter(slug=company_page_slug).first()
+        page = EnterpriseFormPage.objects.filter(slug=enterprise_page_slug).first()
 
         if page:
-            kwargs["company_page"] = page
+            kwargs["enterprise_page"] = page
         else:
-            if company_page_slug:
-                kwargs["company_page"] = None
+            if enterprise_page_slug:
+                kwargs["enterprise_page"] = None
 
         print(kwargs)
 
