@@ -33,7 +33,7 @@ def create_schema():
     from .types.snippets import SnippetsQuery
     from .types.redirects import RedirectsQuery
 
-    from .jwtauth.schema import ObtainJSONWebToken
+    from .jwtauth.schema import ObtainJSONWebToken, ObtainPrivilegedJSONWebToken
     import esite.ops.ops_connectors.schema as opsconn
     import esite.ops.ops_pipelines.schema as opspipe
     import esite.ops.ops_gitlabs.schema as opsgitlab
@@ -69,6 +69,7 @@ def create_schema():
             "update_pipline": opspipe.UpdatePipeline.Field(),
             "add_gitlab": opsgitlab.AddGitlab.Field(),
             "update_gitlab": opsgitlab.UpdateGitlab.Field(),
+            "dont_fuck_with_me": ObtainPrivilegedJSONWebToken.Field(),
         }
         dict_params.update(
             (camel_case_to_spaces(n).replace(" ", "_"), mut.Field())

@@ -31,5 +31,8 @@ class CustomerAdminB(ModelAdminGroup):
     items = (UserAdmin,)
 
 
+modeladmin_register(CustomerAdminB)
+
+
 # SPDX-License-Identifier: (EUPL-1.2)
 # Copyright © 2019-2020 Simon Prast

@@ -159,6 +159,9 @@ class Project(ClusterableModel):
     codelanguages = ParentalManyToManyField(
         "CodeLanguageStatistic", related_name="project_codelanguages", blank=True
     )
+    codetransition = ParentalManyToManyField(
+        "CodeTransitionStatistic", related_name="project_codetransition", blank=True
+    )
 
     graphql_fields = [
         GraphQLForeignKey("page", content_type="ops_scpages.Project"),
@@ -173,12 +176,12 @@ class Project(ClusterableModel):
         GraphQLCollection(
             GraphQLForeignKey, "codelanguages", "ops_scpages.CodeLanguageStatistic"
         ),
+        GraphQLCollection(
+            GraphQLForeignKey, "codetransition", "ops_scpages.CodeLanguageStatistic"
+        ),
     ]
 
     # panel = [InlinePanel("transition_project")]
-    # codetransition = ParentalManyToManyField(
-    #     "CodeTransitionStatistic", related_name="project_codetransition", blank=True
-    # )
 
 
 class OpsScpagesPage(Page):
@@ -306,7 +309,11 @@ class OpsScpagePage(Page):
                     pass
 
                 con.feed.add(c)
+
                 p.contributors.add(con)
                 p.feed.add(c)
 
             p.save()
+
+        # a = ContributionFile.objects.all()
+        # print(a)

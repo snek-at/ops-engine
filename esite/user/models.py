@@ -60,11 +60,11 @@ class User(AbstractUser):
 
         super(User, self).save(*args, **kwargs)
 
-    panels = [
-        FieldPanel("username"),
-        FieldPanel("is_customer"),
-        FieldPanel("registration_data"),
-    ]
+    # panels = [
+    #     # FieldPanel("username"),
+    #     # FieldPanel("is_customer"),
+    #     # FieldPanel("registration_data"),
+    # ]
 
     def __str__(self):
         return self.username
