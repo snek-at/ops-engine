@@ -22,10 +22,27 @@ from wagtail.admin.edit_handlers import (
     MultiFieldPanel,
     FieldPanel,
 )
+from esite.bifrost.helpers import register_streamfield_block
+
+from esite.bifrost.models import (
+    GraphQLForeignKey,
+    GraphQLField,
+    GraphQLStreamfield,
+    GraphQLImage,
+    GraphQLString,
+    GraphQLCollection,
+    GraphQLEmbed,
+    GraphQLSnippet,
+    GraphQLBoolean,
+    GraphQLSnippet,
+)
+
+# from esite.utils.models import BasePage
 
 # Extend AbstractUser Model from django.contrib.auth.models
-class User(AbstractUser):
+class SNEKUser(AbstractUser):
     username = models.CharField(
+        "username",
         null=True,
         blank=False,
         error_messages={"unique": "A user with that username already exists."},
@@ -33,17 +50,16 @@ class User(AbstractUser):
         max_length=36,
         unique=True,
         validators=[django.contrib.auth.validators.UnicodeUsernameValidator()],
-        verbose_name="username",
     )
-    is_customer = models.BooleanField(blank=False, default=False)
-    registration_data = models.TextField(null=True, blank=False)
+    is_enterprise = models.BooleanField("enterprise", blank=False, default=False)
+    cache = models.TextField(null=True, blank=False)
 
     # Custom save function
     def save(self, *args, **kwargs):
         if not self.username:
             self.username = str(uuid.uuid4())
 
-        if not self.registration_data or self.is_customer:
+        if not self.is_staff or self.is_enterprise:
             if not self.is_active:
                 self.is_active = True
 
@@ -58,16 +74,50 @@ class User(AbstractUser):
         else:
             self.is_active = False
 
-        super(User, self).save(*args, **kwargs)
+        super(SNEKUser, self).save(*args, **kwargs)
 
-    # panels = [
-    #     # FieldPanel("username"),
-    #     # FieldPanel("is_customer"),
-    #     # FieldPanel("registration_data"),
-    # ]
+    panels = [
+        FieldPanel("username"),
+        FieldPanel("first_name"),
+        FieldPanel("last_name"),
+        FieldPanel("email"),
+        FieldPanel("is_staff"),
+        FieldPanel("is_active"),
+        FieldPanel("is_enterprise"),
+        FieldPanel("cache"),
+    ]
+
+    graphql_fields = [
+        GraphQLString("username"),
+    ]
 
     def __str__(self):
         return self.username
+
+
+# Extend AbstractUser Model from django.contrib.auth.models
+# class UserPage(BasePage):
+#     # Only allow creating HomePages at the root level
+#     parent_page_types = ["wagtailcore.Page"]
+#     # subpage_types = ['news.NewsIndex', 'standardpages.StandardPage', 'articles.ArticleIndex',
+#     #                 'person.PersonIndex', 'events.EventIndex']
+
+#     user_cache = models.TextField(null=True, blank=True)
+
+#     main_content_panels = []
+
+#     edit_handler = TabbedInterface(
+#         [
+#             ObjectList(
+#                 BasePage.content_panels + main_content_panels, heading="Content"
+#             ),
+#             ObjectList(
+#                 BasePage.promote_panels + BasePage.settings_panels,
+#                 heading="Settings",
+#                 classname="settings",
+#             ),
+#         ]
+#     )
 
 
 # SPDX-License-Identifier: (EUPL-1.2)

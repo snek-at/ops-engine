@@ -23,21 +23,19 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 # Django installation.
 # See https://docs.djangoproject.com/en/stable/ref/settings/#installed-apps
 INSTALLED_APPS = [
-    # Our own pages
-    "esite.home",
     # Our own apps
     "esite.bifrost",
     "esite.core",
+    "esite.utils",
     "esite.user",
-    "esite.colorfield",
     "esite.documents",
     "esite.images",
     "esite.navigation",
-    "esite.utils",
-    "esite.ops.ops_connectors",
-    "esite.ops.ops_gitlabs",
-    "esite.ops.ops_pipelines",
-    "esite.ops.ops_scpages",
+    "esite.colorfield",
+    "esite.ops.ops_enterprise",
+    "esite.ops.ops_gitlab",
+    "esite.ops.ops_conenctor",
+    "esite.ops.ops_pipeline",
     # Django core apps
     "django.contrib.admin",
     "django.contrib.auth",
@@ -171,9 +169,12 @@ BIFROST_APPS = {
     "utils": "",
     "documents": "",
     "images": "",
-    "ops_connectors": "",
-    "ops_pipelines": "",
-    "ops_scpages": "",
+    "user": "",
+    "navigation": "",
+    "ops_enterprise",
+    "ops_gitlab",
+    "ops_conenctor",
+    "ops_pipeline",
 }
 
 # > Password Validation
@@ -188,7 +189,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
-AUTH_USER_MODEL = "user.User"
+AUTH_USER_MODEL = "user.SNEKUser"
 # AUTH_PROFILE_MODULE = "avatar.Avatar"
 
 # > Authentication Backend
@@ -252,11 +253,11 @@ WAGTAILSEARCH_BACKENDS = {
 
 # Custom document model
 # https://docs.wagtail.io/en/stable/advanced_topics/documents/custom_document_model.html
-WAGTAILDOCS_DOCUMENT_MODEL = "documents.CustomDocument"
+WAGTAILDOCS_DOCUMENT_MODEL = "documents.SNEKDocument"
 
 # Custom image model
 # https://docs.wagtail.io/en/stable/advanced_topics/images/custom_image_model.html
-WAGTAILIMAGES_IMAGE_MODEL = "images.CustomImage"
+WAGTAILIMAGES_IMAGE_MODEL = "images.SNEKImage"
 WAGTAILIMAGES_FEATURE_DETECTION_ENABLED = False
 
 # Rich text settings to remove unneeded features
@@ -315,6 +316,11 @@ PASSWORD_REQUIRED_TEMPLATE = "patterns/pages/wagtail/password_required.html"
 # > System Checks
 # Wagtail forms not used so silence captcha warning
 SILENCED_SYSTEM_CHECKS = ["captcha.recaptcha_test_key_error"]
+
+# > WAGTAIL_ALLOW_UNICODE_SLUGS Checks
+# Set this to False to limit slugs to ASCII characters.
+# Ref:https://docs.wagtail.io/en/stable/advanced_topics/settings.html#unicode-page-slugs
+WAGTAIL_ALLOW_UNICODE_SLUGS = True
 
 # SPDX-License-Identifier: (EUPL-1.2)
 # Copyright © 2019-2020 Simon Prast

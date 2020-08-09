@@ -1,11 +1,10 @@
-from wagtail.core.models import Page as wagtailPage
 from django.contrib.auth import get_user_model
+from wagtail.core.models import Page as wagtailPage
 
 import graphene
-from graphql import GraphQLError
 import graphql_jwt
 from ..types.pages import Page
-from graphene.types.generic import GenericScalar
+from ..registry import registry
 
 from esite.bifrost.permissions import with_page_permissions
 
@@ -14,20 +13,18 @@ from esite.bifrost.permissions import with_page_permissions
 
 class ObtainJSONWebToken(graphql_jwt.JSONWebTokenMutation):
 
+    user = graphene.Field(registry.models[get_user_model()])
     profile = graphene.Field(Page)
 
     @classmethod
     def resolve(cls, root, info, **kwargs):
         user = info.context.user
-
-        if user.is_superuser:
-            raise GraphQLError("696 - Opps something went wrong")
-
         profilequery = wagtailPage.objects.filter(slug=f"{user.username}")
         return cls(
+            user=info.context.user,
             profile=with_page_permissions(info.context, profilequery.specific())
             .live()
-            .first()
+            .first(),
         )
 
 

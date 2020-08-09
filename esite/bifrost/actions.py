@@ -422,11 +422,8 @@ def register_form_model(cls: Type[AbstractForm], type_prefix: str):
     @login_required
     def mutate(_self, info, token, url, values):
         url_prefix = url_prefix_for_site(info)
-        print(url, url_prefix + url.rstrip("/") + "/")
         query = WagtailPage.objects.filter(url_path=url_prefix + url.rstrip("/") + "/")
-        # print(query, query.specific())
         instance = with_page_permissions(info.context, query.specific()).live().first()
-        print(instance)
         user = info.context.user
         # convert camelcase to dashes
         values = {
@@ -435,9 +432,7 @@ def register_form_model(cls: Type[AbstractForm], type_prefix: str):
         form = instance.get_form(values, None, page=instance, user=user)
         if form.is_valid():
             # form_submission
-            print("PROCCESS SUBMISION")
             instance.process_form_submission(form)
-            print("PROCCESS SUBMISION END")
             return registry.forms[_node](result="OK")
         else:
             return registry.forms[_node](

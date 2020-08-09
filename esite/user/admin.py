@@ -1,17 +1,21 @@
+from django.contrib.auth import get_user_model
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
     ModelAdminGroup,
     modeladmin_register,
 )
 
-from .models import User
+from esite.person.admin import PersonAdmin
+from esite.ops.enterprise.admin import EnterpriseAdmin
+from esite.registration.admin import RegistrationAdmin
+from esite.profile.admin import ProfileAdmin
 
 # Register your user related models here.
 
 
 class UserAdmin(ModelAdmin):
-    model = User
-    menu_label = "User"
+    model = get_user_model()
+    menu_label = "Person"
     menu_icon = "user"
     menu_order = 290
     add_to_settings_menu = False
@@ -22,17 +26,16 @@ class UserAdmin(ModelAdmin):
     search_fields = ("date_joined", "username", "email")
 
 
-class CustomerAdminB(ModelAdminGroup):
+class UserManagementAdmin(ModelAdminGroup):
     menu_label = "User Management"
     menu_icon = "group"
     menu_order = 110
     add_to_settings_menu = False
     exclude_from_explorer = False
-    items = (UserAdmin,)
+    items = (ProfileAdmin, PersonAdmin, EnterpriseAdmin, RegistrationAdmin)
 
 
-modeladmin_register(CustomerAdminB)
-
+modeladmin_register(UserManagementAdmin)
 
 # SPDX-License-Identifier: (EUPL-1.2)
 # Copyright © 2019-2020 Simon Prast

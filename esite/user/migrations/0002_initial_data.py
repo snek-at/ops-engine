@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from django.db import migrations
 from django.contrib.auth import get_user_model
 
@@ -8,7 +7,7 @@ def create_initialuser(apps, schema_editor):
     User = get_user_model()
 
     # Create anonymous user
-    anonuser = User.objects.create(username="cisco", is_customer=False,)
+    anonuser = User.objects.create(username="cisco")
 
     anonuser.set_password("ciscocisco")
 

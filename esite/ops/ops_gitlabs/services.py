@@ -68,4 +68,3 @@ def create_image_from_url(image_url: str) -> (str, files.File):
         lf.write(block)
 
     return (file_name, files.File(lf))
-

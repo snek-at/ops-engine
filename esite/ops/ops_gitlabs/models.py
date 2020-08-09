@@ -40,8 +40,6 @@ from esite.bifrost.helpers import register_streamfield_block
 
 
 class Gitlab(models.Model):
-    from ..ops_scpages.models import OpsScpagePage
-
     name = models.CharField(null=True, max_length=255)
     description = models.CharField(null=True, blank=True, max_length=255)
     url = models.URLField(null=True, max_length=255)
@@ -53,8 +51,8 @@ class Gitlab(models.Model):
     created = models.DateTimeField(null=True, auto_now_add=True)
     updated = models.DateTimeField(null=True, auto_now=True)
     active = models.BooleanField(default=True)
-    company_page = models.ForeignKey(
-        OpsScpagePage,
+    enterprise_page = models.ForeignKey(
+        "ops_enterprise.EnterpriseFormPage",
         on_delete=models.CASCADE,
         related_name="gitlab_scp_page",
         null=True,
@@ -74,7 +72,7 @@ class Gitlab(models.Model):
                 FieldPanel("description"),
                 FieldPanel("url"),
                 FieldPanel("token"),
-                FieldPanel("company_page"),
+                FieldPanel("enterprise_page"),
             ],
             heading="General",
         ),
@@ -117,11 +115,11 @@ class Gitlab(models.Model):
                 projects.append(project)
 
         # enter the data here
-        if self.company_page:
+        if self.enterprise_page:
             mongodb.get_collection("gitlab").update(
                 {"gitlab_id": self.id},
                 {
-                    "company_page_slug": f"{self.company_page.slug}",
+                    "enterprise_page_slug": f"{self.enterprise_page.slug}",
                     "gitlab_id": self.id,
                     "projects": projects,
                 },

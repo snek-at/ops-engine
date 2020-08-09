@@ -47,8 +47,6 @@ from esite.bifrost.helpers import register_streamfield_block
 
 
 class Connector(models.Model):
-    from ..ops_scpages.models import OpsScpagePage
-
     name = models.CharField(null=True, max_length=255)
     description = models.CharField(null=True, blank=True, max_length=255)
     domain = models.CharField(null=True, max_length=255)
@@ -61,8 +59,8 @@ class Connector(models.Model):
     created = models.DateTimeField(null=True, auto_now_add=True)
     updated = models.DateTimeField(null=True, auto_now=True)
     active = models.BooleanField(default=True)
-    company_page = models.ForeignKey(
-        OpsScpagePage,
+    enterprise_page = models.ForeignKey(
+        "ops_enterprise.EnterpriseFormPage",
         on_delete=models.CASCADE,
         related_name="conntector_scp_page",
         null=True,
@@ -109,7 +107,7 @@ class Connector(models.Model):
                 FieldPanel("description"),
                 FieldPanel("domain"),
                 FieldPanel("token"),
-                FieldPanel("company_page"),
+                FieldPanel("enterprise_page"),
             ],
             heading="General",
         ),

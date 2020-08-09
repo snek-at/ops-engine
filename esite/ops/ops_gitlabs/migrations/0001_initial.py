@@ -9,23 +9,60 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('ops_scpages', '0002_auto_20200808_0337'),
+        ("ops_scpages", "0002_auto_20200808_0337"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Gitlab',
+            name="Gitlab",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, null=True)),
-                ('description', models.CharField(blank=True, max_length=255, null=True)),
-                ('url', models.URLField(max_length=255, null=True)),
-                ('token', models.CharField(help_text='Warning! Changing the token affects the connection to all endpoints.', max_length=255, null=True)),
-                ('created', models.DateTimeField(auto_now_add=True, null=True)),
-                ('updated', models.DateTimeField(auto_now=True, null=True)),
-                ('active', models.BooleanField(default=True)),
-                ('privilegies_mode', models.CharField(choices=[('polp', 'Principle of least privilege'), ('idc', 'Open privilege')], default='isolate', max_length=255)),
-                ('company_page', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='gitlab_scp_page', to='ops_scpages.OpsScpagePage')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255, null=True)),
+                (
+                    "description",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("url", models.URLField(max_length=255, null=True)),
+                (
+                    "token",
+                    models.CharField(
+                        help_text="Warning! Changing the token affects the connection to all endpoints.",
+                        max_length=255,
+                        null=True,
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True, null=True)),
+                ("updated", models.DateTimeField(auto_now=True, null=True)),
+                ("active", models.BooleanField(default=True)),
+                (
+                    "privilegies_mode",
+                    models.CharField(
+                        choices=[
+                            ("polp", "Principle of least privilege"),
+                            ("idc", "Open privilege"),
+                        ],
+                        default="isolate",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "company_page",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="gitlab_scp_page",
+                        to="ops_scpages.OpsScpagePage",
+                    ),
+                ),
             ],
         ),
     ]

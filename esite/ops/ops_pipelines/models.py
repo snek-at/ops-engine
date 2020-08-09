@@ -55,16 +55,14 @@ from esite.utils.edit_handlers import ReadOnlyPanel
 
 
 class Pipeline(models.Model):
-    from ..ops_scpages.models import OpsScpagePage
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(null=True, blank=True, max_length=255)
     description = models.CharField(null=True, blank=True, max_length=255)
     active = models.BooleanField(default=True)
     created = models.DateTimeField(null=True, auto_now_add=True)
     updated = models.DateTimeField(null=True, auto_now=True)
-    company_page = models.ForeignKey(
-        OpsScpagePage,
+    enterprise_page = models.ForeignKey(
+        "ops_enterprise.OpsScpagePage",
         on_delete=models.CASCADE,
         related_name="pipeline_scp_page",
         null=True,
@@ -78,7 +76,7 @@ class Pipeline(models.Model):
                 FieldPanel("name"),
                 FieldPanel("description"),
                 FieldPanel("active"),
-                FieldPanel("company_page"),
+                FieldPanel("enterprise_page"),
             ],
             heading="General",
         ),
@@ -94,7 +92,7 @@ class Pipeline(models.Model):
             {"pipeline_id": self.id},
             {
                 "$addToSet": {"Log": {"$each": raw_data["Git"]}},
-                "company_page_slug": f"{self.company_page.slug}",
+                "enterprise_page_slug": f"{self.enterprise_page.slug}",
             },
             upsert=True,
         )
