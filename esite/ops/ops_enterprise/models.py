@@ -97,7 +97,7 @@ class Enterprise(get_user_model()):
 class ContributionFeed(ClusterableModel):
     page = ParentalKey(
         "EnterpriseFormPage",
-        related_name="contribution_feed",
+        related_name="enterprise_contribution_feed",
         on_delete=models.SET_NULL,
         null=True,
     )
@@ -127,8 +127,8 @@ class ContributionFeed(ClusterableModel):
 
 class ContributionFile(models.Model):
     feed = ParentalKey(
-        "EnterpriseFormPage",
-        related_name="epfeed2",
+        "ContributionFeed",
+        related_name="file_contribution_feed",
         on_delete=models.SET_NULL,
         null=True,
     )
@@ -153,7 +153,7 @@ class ContributionFile(models.Model):
 class CodeLanguageStatistic(models.Model):
     page = ParentalKey(
         "EnterpriseFormPage",
-        related_name="code_language_statistic",
+        related_name="enterprise_codelanguage_statistic",
         on_delete=models.SET_NULL,
         null=True,
     )
@@ -173,7 +173,7 @@ class CodeLanguageStatistic(models.Model):
 class CodeTransitionStatistic(models.Model):
     page = ParentalKey(
         "EnterpriseFormPage",
-        related_name="code_transition_statistic",
+        related_name="enterprise_codetransition_statistic",
         on_delete=models.SET_NULL,
         null=True,
     )
@@ -192,15 +192,21 @@ class CodeTransitionStatistic(models.Model):
 class Contributor(ClusterableModel):
     page = ParentalKey(
         "EnterpriseFormPage",
-        related_name="contributor",
+        related_name="enterprise_contributors",
         on_delete=models.SET_NULL,
+        null=True,
+    )
+    project = ParentalKey(
+        "Project",
+        related_name="project_contributor",
+        on_delete=models.CASCADE,
         null=True,
     )
     name = models.CharField(null=True, max_length=255, default="Unkown")
     username = models.CharField(null=True, max_length=255, default="Unkown")
     active = models.BooleanField(default=True)
     avatar = models.ImageField()
-    feed = ParentalManyToManyField(
+    contribution_feed = ParentalManyToManyField(
         "ContributionFeed", related_name="contributor_feed", blank=True
     )
     codelanguages = ParentalManyToManyField(
@@ -212,11 +218,16 @@ class Contributor(ClusterableModel):
 
     graphql_fields = [
         GraphQLForeignKey("page", content_type="ops_enterprise.Contributor"),
+        GraphQLForeignKey("page", content_type="ops_enterprise.Contributor"),
+        GraphQLForeignKey("page", content_type="ops_enterprise.Contributor"),
+        GraphQLForeignKey("page", content_type="ops_enterprise.Contributor"),
         GraphQLString("name"),
         GraphQLString("username"),
         GraphQLBoolean("active"),
         GraphQLImage("avatar"),
-        GraphQLCollection(GraphQLForeignKey, "feed", "ops_enterprise.ContributionFeed"),
+        GraphQLCollection(
+            GraphQLForeignKey, "contribution_feed", "ops_enterprise.ContributionFeed"
+        ),
         GraphQLCollection(
             GraphQLForeignKey, "codelanguages", "ops_enterprise.CodeLanguageStatistic"
         ),
@@ -234,7 +245,7 @@ class Contributor(ClusterableModel):
 class Project(ClusterableModel):
     page = ParentalKey(
         "EnterpriseFormPage",
-        related_name="opsprojects",
+        related_name="enterprise_projects",
         on_delete=models.SET_NULL,
         null=True,
     )
@@ -252,7 +263,7 @@ class Project(ClusterableModel):
     contributors = ParentalManyToManyField(
         "Contributor", related_name="project_contributor", blank=True
     )
-    feed = ParentalManyToManyField(
+    contribution_feed = ParentalManyToManyField(
         "ContributionFeed", related_name="project_feed", blank=True
     )
     codelanguages = ParentalManyToManyField(
@@ -270,7 +281,9 @@ class Project(ClusterableModel):
         GraphQLString("owner_name"),
         GraphQLString("owner_username"),
         GraphQLString("owner_email"),
-        GraphQLCollection(GraphQLForeignKey, "feed", "ops_enterprise.ContributionFeed"),
+        GraphQLCollection(
+            GraphQLForeignKey, "contribution_feed", "ops_enterprise.ContributionFeed"
+        ),
         GraphQLCollection(
             GraphQLForeignKey, "contributors", "ops_enterprise.Contributor"
         ),
@@ -309,29 +322,28 @@ class EnterpriseFormPage(BaseEmailFormPage):
     Wagtail content and API definition of all tabs
     """
     # Overview
-    overview_panel = [
-        # InlinePanel("epfeed", label="Contributions", heading="Contribution Feed"),
-        # InlinePanel("opsprojects", label="Project", heading="Projects"),
-        # TestPanel("opsprojects")
-        # InlinePanel("epcontributor", label="Contributor", heading="Contributors"),
-    ]
+    overview_panel = []
     graphql_fields = [
-        # GraphQLForeignKey("opsprojects", "ops_enterprise.Project"),
-        GraphQLCollection(GraphQLForeignKey, "opsprojects", "ops_enterprise.Project"),
+        # GraphQLForeignKey("enterprise_projects", "ops_enterprise.Project"),
         GraphQLCollection(
-            GraphQLForeignKey, "contributor", "ops_enterprise.Contributor"
+            GraphQLForeignKey, "enterprise_projects", "ops_enterprise.Project"
         ),
         GraphQLCollection(
-            GraphQLForeignKey, "contribution_feed", "ops_enterprise.ContributionFeed"
+            GraphQLForeignKey, "enterprise_contributors", "ops_enterprise.Contributor"
         ),
         GraphQLCollection(
             GraphQLForeignKey,
-            "code_transition_statistic",
+            "enterprise_contribution_feed",
+            "ops_enterprise.ContributionFeed",
+        ),
+        GraphQLCollection(
+            GraphQLForeignKey,
+            "enterprise_codetransition_statistic",
             "ops_enterprise.CodeTransitionStatistic",
         ),
         GraphQLCollection(
             GraphQLForeignKey,
-            "code_language_statistic",
+            "enterprise_codelanguage_statistic",
             "ops_enterprise.CodeLanguageStatistic",
         ),
     ]
@@ -505,10 +517,12 @@ class EnterpriseFormPage(BaseEmailFormPage):
                 },
             ]
         )
-        print(data)
+        # print(data)
         Project.objects.all().delete()
         Contributor.objects.all().delete()
         ContributionFeed.objects.all().delete()
+        CodeLanguageStatistic.objects.all().delete()
+        CodeTransitionStatistic.objects.all().delete()
         ContributionFile.objects.all().delete()
 
         for project in data:
@@ -524,7 +538,6 @@ class EnterpriseFormPage(BaseEmailFormPage):
             )
 
             for event in project["events"]:
-
                 c, created = ContributionFeed.objects.get_or_create(
                     page=self,
                     type="commit",
@@ -533,8 +546,11 @@ class EnterpriseFormPage(BaseEmailFormPage):
                     message=event["message"],
                 )
 
+                print("pp", p.name)
+
                 con, created = Contributor.objects.get_or_create(
                     page=self,
+                    project=p,
                     name=event["committer_name"],
                     username=event["committer_email"],
                 )
@@ -543,6 +559,7 @@ class EnterpriseFormPage(BaseEmailFormPage):
                     files = event["asset"]["Log"]["files"]
                     for file in files:
                         cf, created = ContributionFile.objects.get_or_create(
+                            feed=c,
                             insertions=file["insertions"],
                             deletions=file["deletions"],
                             path=file["path"],
@@ -566,18 +583,22 @@ class EnterpriseFormPage(BaseEmailFormPage):
                         c.save()
                         con.save()
                         p.save()
-                except:
+                except Exception as ex:
                     pass
 
-                con.feed.add(c)
+                con.contribution_feed.add(c)
+                # print(con.name, c.cid)
 
                 p.contributors.add(con)
-                p.feed.add(c)
+                p.contribution_feed.add(c)
 
             p.save()
-
-        a = ContributionFile.objects.all()
-        # print(a)
+            # print(
+            #     p.name,
+            #     p.contributors.filter(
+            #         username="florian.kleber@edu.htl-villach.at"
+            #     ).codetransition,
+            # )
 
     def get_submission_class(self):
         return EnterpriseFormSubmission
@@ -622,6 +643,7 @@ class EnterpriseFormPage(BaseEmailFormPage):
         )
 
     def process_form_submission(self, form):
+        print("processing form")
 
         user = self.create_enterprise_user(
             cache=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
