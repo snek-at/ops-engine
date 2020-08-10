@@ -97,7 +97,7 @@ class Enterprise(get_user_model()):
 class ContributionFeed(ClusterableModel):
     page = ParentalKey(
         "EnterpriseFormPage",
-        related_name="epfeed",
+        related_name="contribution_feed",
         on_delete=models.SET_NULL,
         null=True,
     )
@@ -151,6 +151,12 @@ class ContributionFile(models.Model):
 
 
 class CodeLanguageStatistic(models.Model):
+    page = ParentalKey(
+        "EnterpriseFormPage",
+        related_name="code_language_statistic",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
     name = models.CharField(null=True, max_length=255, default="Unkown")
     color = models.CharField(null=True, max_length=255, default="Unkown")
     insertions = models.IntegerField(null=True, default="Unkown")
@@ -165,6 +171,13 @@ class CodeLanguageStatistic(models.Model):
 
 
 class CodeTransitionStatistic(models.Model):
+    page = ParentalKey(
+        "EnterpriseFormPage",
+        related_name="code_transition_statistic",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+
     insertions = models.IntegerField(null=True, default="Unkown")
     deletions = models.IntegerField(null=True, default="Unkown")
     datetime = models.DateTimeField(null=True)
@@ -179,7 +192,7 @@ class CodeTransitionStatistic(models.Model):
 class Contributor(ClusterableModel):
     page = ParentalKey(
         "EnterpriseFormPage",
-        related_name="epcontributor",
+        related_name="contributor",
         on_delete=models.SET_NULL,
         null=True,
     )
@@ -265,7 +278,9 @@ class Project(ClusterableModel):
             GraphQLForeignKey, "codelanguages", "ops_enterprise.CodeLanguageStatistic"
         ),
         GraphQLCollection(
-            GraphQLForeignKey, "codetransition", "ops_enterprise.CodeLanguageStatistic"
+            GraphQLForeignKey,
+            "codetransition",
+            "ops_enterprise.CodeTransitionStatistic",
         ),
     ]
 
@@ -304,10 +319,20 @@ class EnterpriseFormPage(BaseEmailFormPage):
         # GraphQLForeignKey("opsprojects", "ops_enterprise.Project"),
         GraphQLCollection(GraphQLForeignKey, "opsprojects", "ops_enterprise.Project"),
         GraphQLCollection(
-            GraphQLForeignKey, "epcontributor", "ops_enterprise.Contributor"
+            GraphQLForeignKey, "contributor", "ops_enterprise.Contributor"
         ),
         GraphQLCollection(
-            GraphQLForeignKey, "epfeed", "ops_enterprise.ContributionFeed"
+            GraphQLForeignKey, "contribution_feed", "ops_enterprise.ContributionFeed"
+        ),
+        GraphQLCollection(
+            GraphQLForeignKey,
+            "code_transition_statistic",
+            "ops_enterprise.CodeTransitionStatistic",
+        ),
+        GraphQLCollection(
+            GraphQLForeignKey,
+            "code_language_statistic",
+            "ops_enterprise.CodeLanguageStatistic",
         ),
     ]
     # Users
@@ -480,11 +505,14 @@ class EnterpriseFormPage(BaseEmailFormPage):
                 },
             ]
         )
+        print(data)
         Project.objects.all().delete()
         Contributor.objects.all().delete()
         ContributionFeed.objects.all().delete()
         ContributionFile.objects.all().delete()
+
         for project in data:
+            # print(project)
             p, created = Project.objects.get_or_create(
                 page=self,
                 name=project["name"],
@@ -523,7 +551,10 @@ class EnterpriseFormPage(BaseEmailFormPage):
 
                         c.files.add(cf)
 
+                        # print(c.files.all())
+
                         cts, created = CodeTransitionStatistic.objects.get_or_create(
+                            page=self,
                             datetime=c.datetime,
                             insertions=cf.insertions,
                             deletions=cf.deletions,
@@ -531,6 +562,10 @@ class EnterpriseFormPage(BaseEmailFormPage):
 
                         con.codetransition.add(cts)
                         p.codetransition.add(cts)
+
+                        c.save()
+                        con.save()
+                        p.save()
                 except:
                     pass
 
@@ -541,7 +576,7 @@ class EnterpriseFormPage(BaseEmailFormPage):
 
             p.save()
 
-        # a = ContributionFile.objects.all()
+        a = ContributionFile.objects.all()
         # print(a)
 
     def get_submission_class(self):

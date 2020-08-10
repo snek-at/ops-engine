@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "wagtail.admin",
     "wagtail.core",
     # Third party apps
+    "django_crontab",
     "corsheaders",
     "django_filters",
     "modelcluster",
@@ -298,7 +299,19 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
 MONGO_HOST = "snekdev.sex12.azure.mongodb.net"
 MONGO_PORT = 27017
 MONGO_USER = "snekman"
-MONGO_PASSWORD = "8iTIrcAO0wxBmgsZ"
+MONGO_PASSWORD = "ZbggfyCTP1dXo0v1"
+
+# Crontab
+CRONJOBS = [
+    (
+        "0 */1 * * *",
+        "esite.ops.ops_gitlab.cron.run_analysis",
+        ">> /Users/nicoschett/Data/DA/ops-engine/file.log",
+    )
+]
+CRONTAB_COMMAND_SUFFIX = "2>&1"
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 9999999999999
 
 
 # Default size of the pagination used on the front-end

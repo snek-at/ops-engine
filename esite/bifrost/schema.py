@@ -36,7 +36,7 @@ def create_schema():
     from .jwtauth.schema import ObtainJSONWebToken, ObtainPrivilegedJSONWebToken
     import esite.ops.ops_connector.schema as opsconn
     import esite.ops.ops_pipeline.schema as opspipe
-    import esite.ops.ops_gitlabs.schema as opsgitlab
+    import esite.ops.ops_gitlab.schema as opsgitlab
 
     class Query(
         opsconn.Query,
