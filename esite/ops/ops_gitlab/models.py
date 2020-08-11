@@ -83,14 +83,16 @@ class Gitlab(models.Model):
         from ...core.services import mongodb
         from .services import GitLabScraper
 
-        print(self.url, self.token)
         gls = GitLabScraper(self.token)
 
         # > Get all projects where token user is member of
         projects = []
 
         for _projects in gls.gen_request(
-            f"{self.url}/projects", optional_parameter="membership=true"
+            f"{self.url}/projects",
+            optional_parameter="membership=true"
+            if self.privileges_mode == "POLP"
+            else "",
         ):
             # print(_projects)
             # > Get all members of each project
