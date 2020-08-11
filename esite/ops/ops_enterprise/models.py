@@ -138,7 +138,6 @@ class ContributionFile(models.Model):
     raw_changes = models.TextField(null=True, max_length=255)
 
     graphql_fields = [
-        GraphQLForeignKey("page", content_type="ops_enterprise.Contributor"),
         GraphQLString("insertions"),
         GraphQLString("deletions"),
         GraphQLString("path"),
@@ -159,8 +158,8 @@ class CodeLanguageStatistic(models.Model):
     )
     name = models.CharField(null=True, max_length=255, default="Unkown")
     color = models.CharField(null=True, max_length=255, default="Unkown")
-    insertions = models.IntegerField(null=True, default="Unkown")
-    deletions = models.IntegerField(null=True, default="Unkown")
+    insertions = models.IntegerField(null=True, default=0)
+    deletions = models.IntegerField(null=True, default=0)
 
     graphql_fields = [
         GraphQLString("name"),
@@ -178,8 +177,8 @@ class CodeTransitionStatistic(models.Model):
         null=True,
     )
 
-    insertions = models.IntegerField(null=True, default="Unkown")
-    deletions = models.IntegerField(null=True, default="Unkown")
+    insertions = models.IntegerField(null=True, default=0)
+    deletions = models.IntegerField(null=True, default=0)
     datetime = models.DateTimeField(null=True)
 
     graphql_fields = [
@@ -196,31 +195,72 @@ class Contributor(ClusterableModel):
         on_delete=models.SET_NULL,
         null=True,
     )
+    name = models.CharField(null=True, max_length=255, default="Unkown")
+    username = models.CharField(null=True, max_length=255, default="Unkown")
+    active = models.BooleanField(default=True)
+    avatar = models.ImageField(null=True)
+    contribution_feed = ParentalManyToManyField(
+        "ContributionFeed", related_name="contributor_feed", blank=True
+    )
+    codelanguages = ParentalManyToManyField(
+        "CodeLanguageStatistic", related_name="contributor_codelanguages", blank=True,
+    )
+    codetransition = ParentalManyToManyField(
+        "CodeTransitionStatistic",
+        related_name="contributor_codetransition",
+        blank=True,
+    )
+
+    graphql_fields = [
+        GraphQLForeignKey("page", content_type="ops_enterprise.EnterpriseFormPage"),
+        GraphQLString("name"),
+        GraphQLString("username"),
+        GraphQLBoolean("active"),
+        GraphQLImage("avatar"),
+        GraphQLCollection(
+            GraphQLForeignKey, "contribution_feed", "ops_enterprise.ContributionFeed"
+        ),
+        GraphQLCollection(
+            GraphQLForeignKey, "codelanguages", "ops_enterprise.CodeLanguageStatistic"
+        ),
+        GraphQLCollection(
+            GraphQLForeignKey,
+            "codetransition",
+            "ops_enterprise.CodeTransitionStatistic",
+        ),
+    ]
+
+    def __str__(self):
+        return f"{self.username}"
+
+
+class ProjectContributor(ClusterableModel):
     project = ParentalKey(
         "Project",
-        related_name="project_contributor",
+        related_name="project_projectcontributor",
         on_delete=models.CASCADE,
         null=True,
     )
     name = models.CharField(null=True, max_length=255, default="Unkown")
     username = models.CharField(null=True, max_length=255, default="Unkown")
     active = models.BooleanField(default=True)
-    avatar = models.ImageField()
+    avatar = models.ImageField(null=True)
     contribution_feed = ParentalManyToManyField(
-        "ContributionFeed", related_name="contributor_feed", blank=True
+        "ContributionFeed", related_name="projectcontributor_feed", blank=True
     )
     codelanguages = ParentalManyToManyField(
-        "CodeLanguageStatistic", related_name="contributor_codelanguages", blank=True
+        "CodeLanguageStatistic",
+        related_name="projectcontributor_codelanguages",
+        blank=True,
     )
     codetransition = ParentalManyToManyField(
-        "CodeTransitionStatistic", related_name="contributor_codetransition", blank=True
+        "CodeTransitionStatistic",
+        related_name="projectcontributor_codetransition",
+        blank=True,
     )
 
     graphql_fields = [
-        GraphQLForeignKey("page", content_type="ops_enterprise.Contributor"),
-        GraphQLForeignKey("page", content_type="ops_enterprise.Contributor"),
-        GraphQLForeignKey("page", content_type="ops_enterprise.Contributor"),
-        GraphQLForeignKey("page", content_type="ops_enterprise.Contributor"),
+        GraphQLForeignKey("project", content_type="ops_enterprise.ProjectContributor"),
         GraphQLString("name"),
         GraphQLString("username"),
         GraphQLBoolean("active"),
@@ -251,7 +291,9 @@ class Project(ClusterableModel):
     )
 
     name = models.CharField(null=True, blank=True, max_length=255, default="Unkown")
-    url = models.URLField(null=True, blank=True, max_length=255, default="Unkown")
+    url = models.URLField(
+        null=True, blank=True, max_length=255, default="https://example.local"
+    )
     description = models.TextField(null=True, blank=True, default="Unkown")
     owner_name = models.CharField(
         null=True, blank=True, max_length=255, default="Unkown"
@@ -259,9 +301,9 @@ class Project(ClusterableModel):
     owner_username = models.CharField(
         null=True, blank=True, max_length=255, default="Unkown"
     )
-    owner_email = models.EmailField(null=True, blank=True, default="Unkown")
+    owner_email = models.EmailField(null=True, blank=True, default="test@snek.at")
     contributors = ParentalManyToManyField(
-        "Contributor", related_name="project_contributor", blank=True
+        "ProjectContributor", related_name="project_contributor", blank=True
     )
     contribution_feed = ParentalManyToManyField(
         "ContributionFeed", related_name="project_feed", blank=True
@@ -285,7 +327,7 @@ class Project(ClusterableModel):
             GraphQLForeignKey, "contribution_feed", "ops_enterprise.ContributionFeed"
         ),
         GraphQLCollection(
-            GraphQLForeignKey, "contributors", "ops_enterprise.Contributor"
+            GraphQLForeignKey, "contributors", "ops_enterprise.ProjectContributor"
         ),
         GraphQLCollection(
             GraphQLForeignKey, "codelanguages", "ops_enterprise.CodeLanguageStatistic"
@@ -545,9 +587,14 @@ class EnterpriseFormPage(BaseEmailFormPage):
 
                 print("pp", p.name)
 
-                con, created = Contributor.objects.get_or_create(
-                    page=self,
+                project_contributor, created = ProjectContributor.objects.get_or_create(
                     project=p,
+                    name=event["committer_name"],
+                    username=event["committer_email"],
+                )
+
+                contributor, created = Contributor.objects.get_or_create(
+                    page=self,
                     name=event["committer_name"],
                     username=event["committer_email"],
                 )
@@ -574,28 +621,34 @@ class EnterpriseFormPage(BaseEmailFormPage):
                             deletions=cf.deletions,
                         )
 
-                        con.codetransition.add(cts)
+                        project_contributor.codetransition.add(cts)
+                        contributor.codetransition.add(cts)
                         p.codetransition.add(cts)
 
                         c.save()
-                        con.save()
+                        project_contributor.save()
+                        contributor.save()
                         p.save()
                 except Exception as ex:
                     pass
 
-                con.contribution_feed.add(c)
-                # print(con.name, c.cid)
+                project_contributor.contribution_feed.add(c)
+                project_contributor.save()
+                contributor.contribution_feed.add(c)
+                contributor.save()
+                # print(project_contributor.name, c.cid)
 
-                p.contributors.add(con)
+                p.contributors.add(project_contributor)
                 p.contribution_feed.add(c)
 
             p.save()
-            # print(
-            #     p.name,
-            #     p.contributors.filter(
-            #         username="florian.kleber@edu.htl-villach.at"
-            #     ).codetransition,
-            # )
+        print(Contributor.objects.all()[0].page)
+        # print(
+        #     p.name,
+        #     p.contributors.filter(
+        #         username="florian.kleber@edu.htl-villach.at"
+        #     ).codetransition,
+        # )
 
     def get_submission_class(self):
         return EnterpriseFormSubmission
