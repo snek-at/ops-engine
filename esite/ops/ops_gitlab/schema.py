@@ -27,24 +27,28 @@ class AddGitlab(graphene.Mutation):
     gitlab = graphene.Field(GitlabType)
 
     class Arguments:
+        token = graphene.String(required=True)
+        active = graphene.Boolean(required=True)
         name = graphene.String(required=True)
         description = graphene.String(required=True)
-        domain = graphene.String(required=True)
+        url = graphene.String(required=True)
         gitlab_token = graphene.String(required=True)
         enterprise_page_slug = graphene.String(required=True)
         active = graphene.Boolean(required=True)
-        privilegies_mode = graphene.String(required=True)
+        privileges_mode = graphene.String(required=True)
 
     @superuser_required
     def mutate(
         self,
         info,
+        token,
+        active,
         name,
         description,
-        domain,
+        url,
         gitlab_token,
         enterprise_page_slug,
-        privilegies_mode,
+        privileges_mode,
     ):
         from ..ops_enterprise.models import EnterpriseFormPage
 
@@ -53,10 +57,10 @@ class AddGitlab(graphene.Mutation):
         gitlab = Gitlab(
             name=name,
             description=description,
-            domain=domain,
+            url=url,
             token=gitlab_token,
             enterprise_page=page,
-            privilegies_mode=privilegies_mode,
+            privileges_mode=privileges_mode,
         )
 
         gitlab.save()
@@ -68,17 +72,19 @@ class UpdateGitlab(graphene.Mutation):
     gitlab = graphene.Field(GitlabType)
 
     class Arguments:
+        token = graphene.String(required=True)
         id = graphene.Int(required=True)
+        enterprise_page_slug = graphene.String(required=False)
         name = graphene.String(required=False)
         description = graphene.String(required=False)
-        domain = graphene.String(required=False)
+        url = graphene.String(required=False)
         gitlab_token = graphene.String(required=False)
-        enterprise_page_slug = graphene.String(required=False)
         active = graphene.Boolean(required=False)
-        privilegies_mode = graphene.String(required=False)
+        privileges_mode = graphene.String(required=False)
 
     @superuser_required
-    def mutate(self, info, id, enterprise_page_slug=None, **kwargs):
+    def mutate(self, info, token, id, enterprise_page_slug=None, **kwargs):
+        print(kwargs)
         from ..ops_enterprise.models import EnterpriseFormPage
 
         page = EnterpriseFormPage.objects.filter(slug=enterprise_page_slug).first()
@@ -98,7 +104,10 @@ class UpdateGitlab(graphene.Mutation):
         Gitlab.objects.filter(id=id).update(**kwargs)
         gitlab = Gitlab.objects.get(id=id)
 
-        gitlab.analyse_gitlab()
+        # try:
+        #     gitlab.analyse_gitlab()
+        # except:
+        #     raise GraphQLError("Analysing Gitlab failed. Token/Url might be invalid")
 
         return UpdateGitlab(gitlab=gitlab)
 
@@ -109,7 +118,7 @@ class Mutation(graphene.ObjectType):
 
 
 class Query(graphene.ObjectType):
-    gitlabs = graphene.List(GitlabType)
+    gitlabs = graphene.List(GitlabType, token=graphene.String(required=True))
 
     @superuser_required
     def resolve_gitlabs(self, info, **_kwargs):

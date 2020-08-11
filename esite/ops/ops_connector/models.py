@@ -49,7 +49,7 @@ from esite.bifrost.helpers import register_streamfield_block
 class Connector(models.Model):
     name = models.CharField(null=True, max_length=255)
     description = models.CharField(null=True, blank=True, max_length=255)
-    domain = models.CharField(null=True, max_length=255)
+    url = models.URLField(null=True, max_length=255)
     token = models.CharField(
         null=True,
         blank=True,
@@ -68,24 +68,24 @@ class Connector(models.Model):
     )
 
     # Settings
-    privilegies_mode = models.CharField(
-        choices=[("polp", "Principle of least privilege"), ("idc", "Open privilege"),],
-        default="isolate",
+    privileges_mode = models.CharField(
+        choices=[("POLP", "Principle of least privilege"), ("IDC", "Open privilege"),],
+        default="POLP",
         max_length=255,
     )
     share_mode = models.CharField(
         choices=[
             (
-                "isolate",
+                "ISOLATE",
                 "Prohibit external authentication - Prohibit company page publishing",
             ),
             (
-                "medium",
+                "MEDIUM",
                 "Prohibit external authentication - Allow company page publishing",
             ),
-            ("open", "Allow external authentication - Allow company page publishing"),
+            ("OPEN", "Allow external authentication - Allow company page publishing"),
         ],
-        default="isolate",
+        default="ISOLATE",
         max_length=255,
     )
     share_projects = models.BooleanField(default=True)
@@ -94,7 +94,7 @@ class Connector(models.Model):
     share_company_recruiting = models.BooleanField(default=True)
     share_company_recruement_url = models.BooleanField(default=True)
     share_company_description = models.BooleanField(default=True)
-    share_company_emplyees_count = models.BooleanField(default=True)
+    share_company_employees_count = models.BooleanField(default=True)
     share_company_vat = models.BooleanField(default=True)
     share_company_email = models.BooleanField(default=True)
     share_company_opensource_status = models.BooleanField(default=True)
@@ -105,7 +105,7 @@ class Connector(models.Model):
             [
                 FieldPanel("name"),
                 FieldPanel("description"),
-                FieldPanel("domain"),
+                FieldPanel("url"),
                 FieldPanel("token"),
                 FieldPanel("enterprise_page"),
             ],
@@ -113,14 +113,15 @@ class Connector(models.Model):
         ),
         MultiFieldPanel(
             [
-                FieldPanel("privilegies_mode"),
+                FieldPanel("privileges_mode"),
                 FieldPanel("share_mode"),
                 FieldPanel("share_projects"),
+                FieldPanel("share_users"),
                 FieldPanel("share_company_name"),
                 FieldPanel("share_company_recruiting"),
                 FieldPanel("share_company_recruement_url"),
                 FieldPanel("share_company_description"),
-                FieldPanel("share_company_emplyees_count"),
+                FieldPanel("share_company_employees_count"),
                 FieldPanel("share_company_vat"),
                 FieldPanel("share_company_email"),
                 FieldPanel("share_company_opensource_status"),
@@ -131,7 +132,7 @@ class Connector(models.Model):
     ]
 
     def __str__(self):
-        return f"{self.name} ({self.domain})"
+        return f"{self.name} ({self.url})"
 
 
 class ConnectorFormField(AbstractFormField):

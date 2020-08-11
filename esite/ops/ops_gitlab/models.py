@@ -59,9 +59,9 @@ class Gitlab(models.Model):
         blank=True,
     )
 
-    privilegies_mode = models.CharField(
-        choices=[("polp", "Principle of least privilege"), ("idc", "Open privilege"),],
-        default="isolate",
+    privileges_mode = models.CharField(
+        choices=[("POLP", "Principle of least privilege"), ("IDC", "Open privilege"),],
+        default="ISOLATE",
         max_length=255,
     )
 
@@ -76,7 +76,7 @@ class Gitlab(models.Model):
             ],
             heading="General",
         ),
-        MultiFieldPanel([FieldPanel("privilegies_mode"),], heading="Settings",),
+        MultiFieldPanel([FieldPanel("privileges_mode"),], heading="Settings",),
     ]
 
     def analyse_gitlab(self):

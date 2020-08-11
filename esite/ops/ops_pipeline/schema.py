@@ -27,13 +27,14 @@ class AddPipeline(graphene.Mutation):
     pipeline = graphene.Field(PipelineType)
 
     class Arguments:
+        token = graphene.String(required=True)
         name = graphene.String(required=True)
         description = graphene.String(required=True)
         active = graphene.Boolean(required=False)
         enterprise_page_slug = graphene.String(required=True)
 
     @superuser_required
-    def mutate(self, info, name, description, active, enterprise_page_slug):
+    def mutate(self, info, token, name, description, active, enterprise_page_slug):
         from ..ops_enterprise.models import EnterpriseFormPage
 
         page = EnterpriseFormPage.objects.get(slug=enterprise_page_slug)
@@ -51,14 +52,15 @@ class UpdatePipeline(graphene.Mutation):
     pipeline = graphene.Field(PipelineType)
 
     class Arguments:
-        id = graphene.Int(required=True)
+        token = graphene.String(required=True)
+        id = graphene.String(required=True)
         name = graphene.String(required=False)
         description = graphene.String(required=False)
         active = graphene.Boolean(required=False)
         enterprise_page_slug = graphene.String(required=False)
 
     @superuser_required
-    def mutate(self, info, id, enterprise_page_slug=None, **kwargs):
+    def mutate(self, info, token, id, enterprise_page_slug=None, **kwargs):
         from ..ops_enterprise.models import EnterpriseFormPage
 
         page = EnterpriseFormPage.objects.filter(slug=enterprise_page_slug).first()
@@ -81,7 +83,7 @@ class Mutation(graphene.ObjectType):
 
 
 class Query(graphene.ObjectType):
-    pipelines = graphene.List(PipelineType)
+    pipelines = graphene.List(PipelineType, token=graphene.String(required=True))
 
     @superuser_required
     def resolve_pipelines(self, info, **_kwargs):

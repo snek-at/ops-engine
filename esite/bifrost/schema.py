@@ -68,7 +68,7 @@ def create_schema():
             "add_connector": opsconn.AddConnector.Field(),
             "update_connector": opsconn.UpdateConnector.Field(),
             "add_pipeline": opspipe.AddPipeline.Field(),
-            "update_pipline": opspipe.UpdatePipeline.Field(),
+            "update_pipeline": opspipe.UpdatePipeline.Field(),
             "add_gitlab": opsgitlab.AddGitlab.Field(),
             "update_gitlab": opsgitlab.UpdateGitlab.Field(),
             "dont_fuck_with_me": ObtainPrivilegedJSONWebToken.Field(),

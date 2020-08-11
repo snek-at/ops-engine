@@ -306,7 +306,7 @@ class EnterpriseFormField(AbstractFormField):
 
 
 class EnterpriseFormSubmission(AbstractFormSubmission):
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    pass
 
 
 class EnterpriseFormPage(BaseEmailFormPage):
@@ -363,7 +363,6 @@ class EnterpriseFormPage(BaseEmailFormPage):
     trade_register_number = models.CharField(null=True, blank=True, max_length=255)
     court_of_registry = models.CharField(null=True, blank=True, max_length=255)
     place_of_registry = models.CharField(null=True, blank=True, max_length=255)
-    trade_register_number = models.CharField(null=True, blank=True, max_length=255)
     ownership = models.CharField(null=True, blank=True, max_length=255)
     email = models.EmailField(null=True, blank=True)
     employee_count = models.CharField(null=True, blank=True, max_length=255)
@@ -390,7 +389,6 @@ class EnterpriseFormPage(BaseEmailFormPage):
             [
                 FieldPanel("vat_number"),
                 FieldPanel("tax_id"),
-                FieldPanel("trade_register_number"),
                 FieldPanel("court_of_registry"),
                 FieldPanel("place_of_registry"),
                 FieldPanel("trade_register_number"),
@@ -423,7 +421,6 @@ class EnterpriseFormPage(BaseEmailFormPage):
         GraphQLString("trade_register_number"),
         GraphQLString("court_of_registry"),
         GraphQLString("place_of_registry"),
-        GraphQLString("trade_register_number"),
         GraphQLString("ownership"),
         GraphQLString("email"),
         GraphQLString("employee_count"),
@@ -643,16 +640,11 @@ class EnterpriseFormPage(BaseEmailFormPage):
         )
 
     def process_form_submission(self, form):
-        print("processing form")
-
-        user = self.create_enterprise_user(
-            cache=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
-        )
+        print(form.cleaned_data)
+        EnterpriseFormPage.objects.filter(id=self.id).update(**form.cleaned_data)
 
         self.get_submission_class().objects.create(
-            form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
-            page=self,
-            user=user,
+            form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder), page=self,
         )
 
         if self.to_address:

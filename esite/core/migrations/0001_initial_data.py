@@ -41,14 +41,14 @@ def create_homepage(apps, schema_editor):
         url_path="/ops/",
     )
 
-    EnterpriseIndex.objects.create(
-        title="Enterprise Pages",
-        slug="enterprise-pages",
-        path="00010002",
-        depth=2,
-        numchild=0,
-        url_path="/enterprise-pages/",
-    )
+    # EnterpriseIndex.objects.create(
+    #     title="Enterprise Pages",
+    #     slug="enterprise-pages",
+    #     path="00010011",
+    #     depth=2,
+    #     numchild=0,
+    #     url_path="/enterprise-pages/",
+    # )
 
     # Create default site
     Site.objects.create(root_page_id=enterprise_page.id, is_default_site=True)

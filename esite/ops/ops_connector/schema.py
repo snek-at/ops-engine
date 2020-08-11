@@ -27,13 +27,14 @@ class AddConnector(graphene.Mutation):
     connector = graphene.Field(ConnectorType)
 
     class Arguments:
+        token = graphene.String(required=True)
         name = graphene.String(required=True)
         description = graphene.String(required=True)
-        domain = graphene.String(required=True)
+        url = graphene.String(required=True)
         connector_token = graphene.String(required=True)
         enterprise_page_slug = graphene.String(required=True)
         active = graphene.Boolean(required=True)
-        privilegies_mode = graphene.String(required=True)
+        privileges_mode = graphene.String(required=True)
         share_mode = graphene.String(required=True)
         settings = GenericScalar()
 
@@ -41,13 +42,14 @@ class AddConnector(graphene.Mutation):
     def mutate(
         self,
         info,
+        token,
         name,
         description,
-        domain,
+        url,
         connector_token,
         enterprise_page_slug,
         active,
-        privilegies_mode,
+        privileges_mode,
         share_mode,
         settings,
     ):
@@ -58,10 +60,10 @@ class AddConnector(graphene.Mutation):
         connector = Connector(
             name=name,
             description=description,
-            domain=domain,
+            url=url,
             token=connector_token,
             enterprise_page=page,
-            privilegies_mode=privilegies_mode,
+            privileges_mode=privileges_mode,
             share_mode=share_mode,
             **settings,
         )
@@ -75,19 +77,20 @@ class UpdateConnector(graphene.Mutation):
     connector = graphene.Field(ConnectorType)
 
     class Arguments:
+        token = graphene.String(required=True)
         id = graphene.Int(required=True)
         name = graphene.String(required=False)
         description = graphene.String(required=True)
-        domain = graphene.String(required=False)
+        url = graphene.String(required=False)
         connector_token = graphene.String(required=False)
         enterprise_page_slug = graphene.String(required=False)
         active = graphene.Boolean(required=False)
-        privilegies_mode = graphene.String(required=False)
+        privileges_mode = graphene.String(required=False)
         share_mode = graphene.String(required=False)
         settings = GenericScalar(required=False)
 
     @superuser_required
-    def mutate(self, info, id, enterprise_page_slug=None, settings={}, **kwargs):
+    def mutate(self, info, token, id, enterprise_page_slug=None, settings={}, **kwargs):
         from ..ops_enterprise.models import EnterpriseFormPage
 
         page = EnterpriseFormPage.objects.filter(slug=enterprise_page_slug).first()
@@ -114,7 +117,7 @@ class Mutation(graphene.ObjectType):
 
 
 class Query(graphene.ObjectType):
-    connectors = graphene.List(ConnectorType)
+    connectors = graphene.List(ConnectorType, token=graphene.String(required=True))
 
     @superuser_required
     def resolve_connectors(self, info, **_kwargs):
