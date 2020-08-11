@@ -2,7 +2,7 @@ import json
 import uuid
 import django.contrib.auth.validators
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.mail import send_mail
 from django.db import models
@@ -53,6 +53,15 @@ class SNEKUser(AbstractUser):
     )
     is_enterprise = models.BooleanField("enterprise", blank=False, default=False)
     cache = models.TextField(null=True, blank=False)
+    groups = models.ManyToManyField(
+        Group,
+        verbose_name="groups",
+        blank=True,
+        help_text="The groups this user belongs to. A user will get all permissions "
+        "granted to each of their groups.",
+        related_name="user_set",
+        related_query_name="user",
+    )
 
     # Custom save function
     def save(self, *args, **kwargs):
@@ -89,10 +98,16 @@ class SNEKUser(AbstractUser):
 
     graphql_fields = [
         GraphQLString("username"),
+        # GraphQLForeignKey("groups", "user.SNEKGroup", is_list=True)
+        # GraphQLCollection(GraphQLForeignKey, "groups", "auth.group"),
     ]
 
     def __str__(self):
         return self.username
+
+
+class SNEKGroup(Group):
+    pass
 
 
 # Extend AbstractUser Model from django.contrib.auth.models

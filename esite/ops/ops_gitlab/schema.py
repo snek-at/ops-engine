@@ -112,6 +112,24 @@ class UpdateGitlab(graphene.Mutation):
         return UpdateGitlab(gitlab=gitlab)
 
 
+class DeleteGitlab(graphene.Mutation):
+    success = graphene.Boolean()
+
+    class Arguments:
+        token = graphene.String(required=True)
+        id = graphene.Int(required=True)
+
+    @superuser_required
+    def mutate(self, info, token, id, **kwargs):
+        success = True
+        try:
+            Gitlab.objects.get(id=id).delete()
+        except:
+            success = False
+
+        return DeleteGitlab(success=success)
+
+
 class Mutation(graphene.ObjectType):
     add_gitlab = AddGitlab.Field()
     update_gitlab = UpdateGitlab.Field()

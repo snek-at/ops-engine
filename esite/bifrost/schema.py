@@ -66,10 +66,13 @@ def create_schema():
             "refresh_token": graphql_jwt.Refresh.Field(),
             "revoke_token": graphql_jwt.Revoke.Field(),
             "add_connector": opsconn.AddConnector.Field(),
+            "delete_connector": opsconn.DeleteConnector.Field(),
             "update_connector": opsconn.UpdateConnector.Field(),
             "add_pipeline": opspipe.AddPipeline.Field(),
+            "delete_pipeline": opspipe.DeletePipeline.Field(),
             "update_pipeline": opspipe.UpdatePipeline.Field(),
             "add_gitlab": opsgitlab.AddGitlab.Field(),
+            "delete_gitlab": opsgitlab.DeleteGitlab.Field(),
             "update_gitlab": opsgitlab.UpdateGitlab.Field(),
             "dont_fuck_with_me": ObtainPrivilegedJSONWebToken.Field(),
         }

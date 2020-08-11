@@ -77,6 +77,24 @@ class UpdatePipeline(graphene.Mutation):
         return UpdatePipeline(pipeline=pipeline)
 
 
+class DeletePipeline(graphene.Mutation):
+    success = graphene.Boolean()
+
+    class Arguments:
+        token = graphene.String(required=True)
+        id = graphene.String(required=True)
+
+    @superuser_required
+    def mutate(self, info, token, id, **kwargs):
+        success = True
+        try:
+            Pipeline.objects.get(id=id).delete()
+        except:
+            success = False
+
+        return DeletePipeline(success=success)
+
+
 class Mutation(graphene.ObjectType):
     add_pipeline = AddPipeline.Field()
     update_pipeline = UpdatePipeline.Field()

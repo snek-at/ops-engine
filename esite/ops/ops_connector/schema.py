@@ -111,6 +111,24 @@ class UpdateConnector(graphene.Mutation):
         return UpdateConnector(connector=connector)
 
 
+class DeleteConnector(graphene.Mutation):
+    success = graphene.Boolean()
+
+    class Arguments:
+        token = graphene.String(required=True)
+        id = graphene.Int(required=True)
+
+    @superuser_required
+    def mutate(self, info, token, id, **kwargs):
+        success = True
+        try:
+            Connector.objects.get(id=id).delete()
+        except:
+            success = False
+
+        return DeleteConnector(success=success)
+
+
 class Mutation(graphene.ObjectType):
     add_connector = AddConnector.Field()
     update_connector = UpdateConnector.Field()
