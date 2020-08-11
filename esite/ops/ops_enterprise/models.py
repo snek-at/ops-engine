@@ -1,5 +1,6 @@
 import uuid
 import json
+import os
 from django.conf import settings
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.contrib.auth import get_user_model
@@ -56,6 +57,8 @@ from esite.bifrost.models import (
 from esite.colorfield.blocks import ColorBlock
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.core import fields
+from guesslang import Guess
+import yaml
 
 # Model manager to use in Proxy model
 class ProxyManager(BaseUserManager):
@@ -108,6 +111,11 @@ class ContributionFeed(ClusterableModel):
     files = ParentalManyToManyField(
         "ContributionFile", related_name="files", null=True, blank=True
     )
+    codelanguages = ParentalManyToManyField(
+        "CodeLanguageStatistic",
+        related_name="contributionfeed_codelanguages",
+        blank=True,
+    )
 
     graphql_fields = [
         GraphQLForeignKey("page", content_type="ops_enterprise.Contributor"),
@@ -117,6 +125,9 @@ class ContributionFeed(ClusterableModel):
         GraphQLString("message"),
         GraphQLCollection(
             GraphQLForeignKey, "files", "ops_enterprise.ContributionFile"
+        ),
+        GraphQLCollection(
+            GraphQLForeignKey, "codelanguages", "ops_enterprise.CodeLanguageStatistic"
         ),
     ]
 
@@ -157,13 +168,17 @@ class CodeLanguageStatistic(models.Model):
         null=True,
     )
     name = models.CharField(null=True, max_length=255, default="Unkown")
+    type = models.CharField(null=True, max_length=255, default="Unkown")
     color = models.CharField(null=True, max_length=255, default="Unkown")
+    primary_extention = models.CharField(null=True, max_length=255, default="Unkown")
     insertions = models.IntegerField(null=True, default=0)
     deletions = models.IntegerField(null=True, default=0)
 
     graphql_fields = [
         GraphQLString("name"),
+        GraphQLString("type"),
         GraphQLString("color"),
+        GraphQLString("primary_extention"),
         GraphQLString("insertions"),
         GraphQLString("deletions"),
     ]
@@ -556,13 +571,18 @@ class EnterpriseFormPage(BaseEmailFormPage):
                 },
             ]
         )
+
+        # Read language definition file for later use
+        with open(os.path.join(settings.BASE_DIR, "languages.yaml")) as f:
+            language_table = yaml.load(f, Loader=yaml.FullLoader)
+
         # print(data)
-        Project.objects.all().delete()
-        Contributor.objects.all().delete()
-        ContributionFeed.objects.all().delete()
-        CodeLanguageStatistic.objects.all().delete()
-        CodeTransitionStatistic.objects.all().delete()
-        ContributionFile.objects.all().delete()
+        # Project.objects.all().delete()
+        # Contributor.objects.all().delete()
+        # ContributionFeed.objects.all().delete()
+        # CodeLanguageStatistic.objects.all().delete()
+        # CodeTransitionStatistic.objects.all().delete()
+        # ContributionFile.objects.all().delete()
 
         for project in data:
             # print(project)
@@ -610,9 +630,35 @@ class EnterpriseFormPage(BaseEmailFormPage):
                             raw_changes=file["raw_changes"],
                         )
 
-                        c.files.add(cf)
+                        # Analyse raw_changes for programming languages
+                        language_name = Guess().language_name(file["raw_changes"])
+                        langguage_statistic = language_table[language_name]
+
+                        # Check if language_statistic is a subgroup of a main
+                        # language, if so take group as new language_statistic
+                        if "group" in langguage_statistic:
+                            language_name = langguage_statistic["group"]
+                            langguage_statistic = language_table[language_name]
+
+                        print(language_name, langguage_statistic, cf.path)
+                        (
+                            code_language_statistic,
+                            created,
+                        ) = CodeLanguageStatistic.objects.get_or_create(
+                            page=self,
+                            name=language_name,
+                            type=langguage_statistic["type"],
+                            color=langguage_statistic["color"]
+                            if langguage_statistic["color"]
+                            else "#8C92AC",
+                            primary_extention=langguage_statistic["primary_extension"],
+                            insertions=file["insertions"],
+                            deletions=file["deletions"],
+                        )
+                        print("reached")
 
                         # print(c.files.all())
+                        c.files.add(cf)
 
                         cts, created = CodeTransitionStatistic.objects.get_or_create(
                             page=self,
@@ -620,9 +666,14 @@ class EnterpriseFormPage(BaseEmailFormPage):
                             insertions=cf.insertions,
                             deletions=cf.deletions,
                         )
+                        print("reached2")
 
+                        c.codelanguages.add(code_language_statistic)
                         project_contributor.codetransition.add(cts)
+                        project_contributor.codelanguages.add(code_language_statistic)
                         contributor.codetransition.add(cts)
+                        contributor.codelanguages.add(code_language_statistic)
+                        p.codelanguages.add(code_language_statistic)
                         p.codetransition.add(cts)
 
                         c.save()
@@ -642,7 +693,6 @@ class EnterpriseFormPage(BaseEmailFormPage):
                 p.contribution_feed.add(c)
 
             p.save()
-        print(Contributor.objects.all()[0].page)
         # print(
         #     p.name,
         #     p.contributors.filter(
