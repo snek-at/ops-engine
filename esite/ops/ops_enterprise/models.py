@@ -586,119 +586,136 @@ class EnterpriseFormPage(BaseEmailFormPage):
 
         for project in data:
             # print(project)
-            p, created = Project.objects.get_or_create(
-                page=self,
-                name=project["name"],
-                url=project["url"],
-                description=project["description"],
-                owner_name=project["maintainer_name"],
-                owner_username=project["maintainer_username"],
-                owner_email=project["maintainer_email"],
-            )
-
-            for event in project["events"]:
-                c, created = ContributionFeed.objects.get_or_create(
+            if bool(project):
+                p, created = Project.objects.get_or_create(
                     page=self,
-                    type="commit",
-                    datetime=event["created_at"],
-                    cid=event["id"],
-                    message=event["message"],
+                    name=project["name"],
+                    url=project["url"],
+                    description=project["description"],
+                    owner_name=project["maintainer_name"],
+                    owner_username=project["maintainer_username"],
+                    owner_email=project["maintainer_email"],
                 )
 
-                print("pp", p.name)
+                for event in project["events"]:
+                    if bool(event):
 
-                project_contributor, created = ProjectContributor.objects.get_or_create(
-                    project=p,
-                    name=event["committer_name"],
-                    username=event["committer_email"],
-                )
+                        if "committed_date" in event:
+                            date = event["committed_date"]
+                        elif "authored_date" in event:
+                            date = event["authored_date"]
+                        elif "created_date" in event:
+                            date = event["created_date"]
 
-                contributor, created = Contributor.objects.get_or_create(
-                    page=self,
-                    name=event["committer_name"],
-                    username=event["committer_email"],
-                )
-
-                try:
-                    files = event["asset"]["Log"]["files"]
-                    for file in files:
-                        cf, created = ContributionFile.objects.get_or_create(
-                            feed=c,
-                            insertions=file["insertions"],
-                            deletions=file["deletions"],
-                            path=file["path"],
-                            raw_changes=file["raw_changes"],
+                        print(event)
+                        c, created = ContributionFeed.objects.get_or_create(
+                            page=self,
+                            type="commit",
+                            datetime=date,
+                            cid=event["id"],
+                            message=event["message"],
                         )
 
-                        # Analyse raw_changes for programming languages
-                        language_name = Guess().language_name(file["raw_changes"])
-                        langguage_statistic = language_table[language_name]
+                        print("pp", p.name)
 
-                        # Check if language_statistic is a subgroup of a main
-                        # language, if so take group as new language_statistic
-                        if "group" in langguage_statistic:
-                            language_name = langguage_statistic["group"]
-                            langguage_statistic = language_table[language_name]
-
-                        print(language_name, langguage_statistic, cf.path)
                         (
-                            code_language_statistic,
+                            project_contributor,
                             created,
-                        ) = CodeLanguageStatistic.objects.get_or_create(
-                            page=self,
-                            name=language_name,
-                            type=langguage_statistic["type"],
-                            color=langguage_statistic["color"]
-                            if langguage_statistic["color"]
-                            else "#8C92AC",
-                            primary_extention=langguage_statistic["primary_extension"],
-                            insertions=file["insertions"],
-                            deletions=file["deletions"],
+                        ) = ProjectContributor.objects.get_or_create(
+                            project=p,
+                            name=event["committer_name"],
+                            username=event["committer_email"],
                         )
-                        print("reached")
 
-                        # print(c.files.all())
-                        c.files.add(cf)
-
-                        cts, created = CodeTransitionStatistic.objects.get_or_create(
+                        contributor, created = Contributor.objects.get_or_create(
                             page=self,
-                            datetime=c.datetime,
-                            insertions=cf.insertions,
-                            deletions=cf.deletions,
+                            name=event["committer_name"],
+                            username=event["committer_email"],
                         )
-                        print("reached2")
 
-                        c.codelanguages.add(code_language_statistic)
-                        project_contributor.codetransition.add(cts)
-                        project_contributor.codelanguages.add(code_language_statistic)
-                        contributor.codetransition.add(cts)
-                        contributor.codelanguages.add(code_language_statistic)
-                        p.codelanguages.add(code_language_statistic)
-                        p.codetransition.add(cts)
+                        try:
+                            files = event["asset"]["Log"]["files"]
+                            for file in files:
+                                cf, created = ContributionFile.objects.get_or_create(
+                                    feed=c,
+                                    insertions=file["insertions"],
+                                    deletions=file["deletions"],
+                                    path=file["path"],
+                                    raw_changes=file["raw_changes"],
+                                )
 
-                        c.save()
+                                # Analyse raw_changes for programming languages
+                                language_name = Guess().language_name(
+                                    file["raw_changes"]
+                                )
+                                langguage_statistic = language_table[language_name]
+
+                                # Check if language_statistic is a subgroup of a main
+                                # language, if so take group as new language_statistic
+                                if "group" in langguage_statistic:
+                                    language_name = langguage_statistic["group"]
+                                    langguage_statistic = language_table[language_name]
+
+                                print(language_name, langguage_statistic, cf.path)
+                                (
+                                    code_language_statistic,
+                                    created,
+                                ) = CodeLanguageStatistic.objects.get_or_create(
+                                    page=self,
+                                    name=language_name,
+                                    type=langguage_statistic["type"],
+                                    color=langguage_statistic["color"]
+                                    if langguage_statistic["color"]
+                                    else "#8C92AC",
+                                    primary_extention=langguage_statistic[
+                                        "primary_extension"
+                                    ],
+                                    insertions=file["insertions"],
+                                    deletions=file["deletions"],
+                                )
+                                print("reached")
+
+                                # print(c.files.all())
+                                c.files.add(cf)
+
+                                (
+                                    cts,
+                                    created,
+                                ) = CodeTransitionStatistic.objects.get_or_create(
+                                    page=self,
+                                    datetime=c.datetime,
+                                    insertions=cf.insertions,
+                                    deletions=cf.deletions,
+                                )
+                                print("reached2")
+
+                                c.codelanguages.add(code_language_statistic)
+                                project_contributor.codetransition.add(cts)
+                                project_contributor.codelanguages.add(
+                                    code_language_statistic
+                                )
+                                contributor.codetransition.add(cts)
+                                contributor.codelanguages.add(code_language_statistic)
+                                p.codelanguages.add(code_language_statistic)
+                                p.codetransition.add(cts)
+
+                                c.save()
+                                project_contributor.save()
+                                contributor.save()
+                                p.save()
+                        except Exception as ex:
+                            pass
+
+                        project_contributor.contribution_feed.add(c)
                         project_contributor.save()
+                        contributor.contribution_feed.add(c)
                         contributor.save()
-                        p.save()
-                except Exception as ex:
-                    pass
+                        # print(project_contributor.name, c.cid)
 
-                project_contributor.contribution_feed.add(c)
-                project_contributor.save()
-                contributor.contribution_feed.add(c)
-                contributor.save()
-                # print(project_contributor.name, c.cid)
+                        p.contributors.add(project_contributor)
+                        p.contribution_feed.add(c)
 
-                p.contributors.add(project_contributor)
-                p.contribution_feed.add(c)
-
-            p.save()
-        # print(
-        #     p.name,
-        #     p.contributors.filter(
-        #         username="florian.kleber@edu.htl-villach.at"
-        #     ).codetransition,
-        # )
+                p.save()
 
     def get_submission_class(self):
         return EnterpriseFormSubmission
