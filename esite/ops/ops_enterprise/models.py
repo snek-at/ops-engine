@@ -170,7 +170,7 @@ class CodeLanguageStatistic(models.Model):
     name = models.CharField(null=True, max_length=255, default="Unkown")
     type = models.CharField(null=True, max_length=255, default="Unkown")
     color = models.CharField(null=True, max_length=255, default="Unkown")
-    primary_extention = models.CharField(null=True, max_length=255, default="Unkown")
+    primary_extension = models.CharField(null=True, max_length=255, default="Unkown")
     insertions = models.IntegerField(null=True, default=0)
     deletions = models.IntegerField(null=True, default=0)
 
@@ -178,7 +178,7 @@ class CodeLanguageStatistic(models.Model):
         GraphQLString("name"),
         GraphQLString("type"),
         GraphQLString("color"),
-        GraphQLString("primary_extention"),
+        GraphQLString("primary_extension"),
         GraphQLString("insertions"),
         GraphQLString("deletions"),
     ]
@@ -667,7 +667,7 @@ class EnterpriseFormPage(BaseEmailFormPage):
                                     color=langguage_statistic["color"]
                                     if langguage_statistic["color"]
                                     else "#8C92AC",
-                                    primary_extention=langguage_statistic[
+                                    primary_extension=langguage_statistic[
                                         "primary_extension"
                                     ],
                                     insertions=file["insertions"],
