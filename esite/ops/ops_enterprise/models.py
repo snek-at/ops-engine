@@ -378,33 +378,54 @@ class EnterpriseFormPage(BaseEmailFormPage):
     """[Tabs]
     Wagtail content and API definition of all tabs
     """
-    # Overview
-    overview_panel = []
-    graphql_fields = [
-        # GraphQLForeignKey("enterprise_projects", "ops_enterprise.Project"),
-        GraphQLCollection(
-            GraphQLForeignKey, "enterprise_projects", "ops_enterprise.Project"
-        ),
-        GraphQLCollection(
-            GraphQLForeignKey, "enterprise_contributors", "ops_enterprise.Contributor"
-        ),
+    # ContributionFeed
+    graphql_fields += [
         GraphQLCollection(
             GraphQLForeignKey,
             "enterprise_contribution_feed",
             "ops_enterprise.ContributionFeed",
         ),
+    ]
+    # Contributors
+    contributor_panel = [InlinePanel("enterprise_contributors", heading="Contributors")]
+
+    graphql_fields += [
         GraphQLCollection(
-            GraphQLForeignKey,
-            "enterprise_codetransition_statistic",
-            "ops_enterprise.CodeTransitionStatistic",
+            GraphQLForeignKey, "enterprise_contributors", "ops_enterprise.Contributor"
+        )
+    ]
+    # Projects
+    project_panel = [InlinePanel("enterprise_projects", heading="Contributors")]
+
+    graphql_fields += [
+        GraphQLCollection(
+            GraphQLForeignKey, "enterprise_projects", "ops_enterprise.Project"
         ),
+    ]
+    # CodeLanguageStatistic
+    codelangaugestatistic_panel = [
+        InlinePanel("enterprise_codelanguage_statistic", heading="Language Statistic")
+    ]
+
+    graphql_fields += [
         GraphQLCollection(
             GraphQLForeignKey,
             "enterprise_codelanguage_statistic",
             "ops_enterprise.CodeLanguageStatistic",
         ),
     ]
-    # Users
+    # CodeTransitionStatistic
+    codetransitionstatistic_panel = [
+        InlinePanel("enterprise_codetransition_statistic", heading="Language Statistic")
+    ]
+
+    graphql_fields += [
+        GraphQLCollection(
+            GraphQLForeignKey,
+            "enterprise_codetransition_statistic",
+            "ops_enterprise.CodeTransitionStatistic",
+        ),
+    ]
 
     # Imprint
     imprint_tab_name = models.CharField(null=True, blank=True, max_length=255)
@@ -516,8 +537,10 @@ class EnterpriseFormPage(BaseEmailFormPage):
         [
             # ObjectList(Page.content_panels + overview_panels, heading="Overview"),
             ObjectList(Page.content_panels, heading="Overview"),
-            # ObjectList(user_panels, heading="Users"),
-            # ObjectList(project_panels, heading="Projects"),
+            ObjectList(codelangaugestatistic_panel, heading="Language Statistic"),
+            ObjectList(codetransitionstatistic_panel, heading="Transition Statistic"),
+            ObjectList(contributor_panel, heading="Contributors"),
+            ObjectList(project_panel, heading="Projects"),
             ObjectList(imprint_panels, heading="Imprint"),
             ObjectList(form_panels, heading="Form"),
             ObjectList(
