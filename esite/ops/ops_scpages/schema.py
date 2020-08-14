@@ -53,7 +53,7 @@ class Mutation(graphene.ObjectType):
 class Query(graphene.ObjectType):
     pipelines = graphene.List(PipelineType)
 
-    @superuser_required
+    @login_required
     def resolve_pipelines(self, info, **_kwargs):
 
         return Pipeline.objects.all()

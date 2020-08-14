@@ -62,19 +62,20 @@ def create_schema():
     def mutation_parameters() -> dict:
         dict_params = {
             "token_auth": ObtainJSONWebToken.Field(),
+            "privileged_token_auth": ObtainPrivilegedJSONWebToken.Field(),
             "verify_token": graphql_jwt.Verify.Field(),
             "refresh_token": graphql_jwt.Refresh.Field(),
             "revoke_token": graphql_jwt.Revoke.Field(),
             "add_connector": opsconn.AddConnector.Field(),
             "delete_connector": opsconn.DeleteConnector.Field(),
             "update_connector": opsconn.UpdateConnector.Field(),
+            "publish_company_page": opsconn.PublishPageViaConnector.Field(),
             "add_pipeline": opspipe.AddPipeline.Field(),
             "delete_pipeline": opspipe.DeletePipeline.Field(),
             "update_pipeline": opspipe.UpdatePipeline.Field(),
             "add_gitlab": opsgitlab.AddGitlab.Field(),
             "delete_gitlab": opsgitlab.DeleteGitlab.Field(),
             "update_gitlab": opsgitlab.UpdateGitlab.Field(),
-            "dont_fuck_with_me": ObtainPrivilegedJSONWebToken.Field(),
         }
         dict_params.update(
             (camel_case_to_spaces(n).replace(" ", "_"), mut.Field())

@@ -37,7 +37,7 @@ class AddGitlab(graphene.Mutation):
         active = graphene.Boolean(required=True)
         privileges_mode = graphene.String(required=True)
 
-    @superuser_required
+    @login_required
     def mutate(
         self,
         info,
@@ -82,7 +82,7 @@ class UpdateGitlab(graphene.Mutation):
         active = graphene.Boolean(required=False)
         privileges_mode = graphene.String(required=False)
 
-    @superuser_required
+    @login_required
     def mutate(self, info, token, id, enterprise_page_slug=None, **kwargs):
         print(kwargs)
         from ..ops_enterprise.models import EnterpriseFormPage
@@ -119,7 +119,7 @@ class DeleteGitlab(graphene.Mutation):
         token = graphene.String(required=True)
         id = graphene.Int(required=True)
 
-    @superuser_required
+    @login_required
     def mutate(self, info, token, id, **kwargs):
         success = True
         try:
@@ -138,7 +138,7 @@ class Mutation(graphene.ObjectType):
 class Query(graphene.ObjectType):
     gitlabs = graphene.List(GitlabType, token=graphene.String(required=True))
 
-    @superuser_required
+    @login_required
     def resolve_gitlabs(self, info, **_kwargs):
 
         return Gitlab.objects.all()

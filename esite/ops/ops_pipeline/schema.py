@@ -33,7 +33,7 @@ class AddPipeline(graphene.Mutation):
         active = graphene.Boolean(required=False)
         enterprise_page_slug = graphene.String(required=True)
 
-    @superuser_required
+    @login_required
     def mutate(self, info, token, name, description, active, enterprise_page_slug):
         from ..ops_enterprise.models import EnterpriseFormPage
 
@@ -59,7 +59,7 @@ class UpdatePipeline(graphene.Mutation):
         active = graphene.Boolean(required=False)
         enterprise_page_slug = graphene.String(required=False)
 
-    @superuser_required
+    @login_required
     def mutate(self, info, token, id, enterprise_page_slug=None, **kwargs):
         from ..ops_enterprise.models import EnterpriseFormPage
 
@@ -84,7 +84,7 @@ class DeletePipeline(graphene.Mutation):
         token = graphene.String(required=True)
         id = graphene.String(required=True)
 
-    @superuser_required
+    @login_required
     def mutate(self, info, token, id, **kwargs):
         success = True
         try:
@@ -103,7 +103,7 @@ class Mutation(graphene.ObjectType):
 class Query(graphene.ObjectType):
     pipelines = graphene.List(PipelineType, token=graphene.String(required=True))
 
-    @superuser_required
+    @login_required
     def resolve_pipelines(self, info, **_kwargs):
 
         return Pipeline.objects.all()

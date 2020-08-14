@@ -38,7 +38,7 @@ class AddConnector(graphene.Mutation):
         share_mode = graphene.String(required=True)
         settings = GenericScalar()
 
-    @superuser_required
+    @login_required
     def mutate(
         self,
         info,
@@ -89,7 +89,7 @@ class UpdateConnector(graphene.Mutation):
         share_mode = graphene.String(required=False)
         settings = GenericScalar(required=False)
 
-    @superuser_required
+    @login_required
     def mutate(self, info, token, id, enterprise_page_slug=None, settings={}, **kwargs):
         from ..ops_enterprise.models import EnterpriseFormPage
 
@@ -118,7 +118,7 @@ class DeleteConnector(graphene.Mutation):
         token = graphene.String(required=True)
         id = graphene.Int(required=True)
 
-    @superuser_required
+    @login_required
     def mutate(self, info, token, id, **kwargs):
         success = True
         try:
@@ -129,6 +129,28 @@ class DeleteConnector(graphene.Mutation):
         return DeleteConnector(success=success)
 
 
+class PublishPageViaConnector(graphene.Mutation):
+    success = graphene.Boolean()
+
+    class Arguments:
+        token = graphene.String(required=True)
+        connector_id = graphene.Int(required=True)
+
+    @login_required
+    def mutate(self, info, token, connector_id, **kwargs):
+        success = True
+        try:
+            print(connector_id)
+            c = Connector.objects.get(id=connector_id)
+            print(c)
+            c.publish()
+        except Exception as ex:
+            print(ex)
+            success = False
+
+        return PublishPageViaConnector(success=success)
+
+
 class Mutation(graphene.ObjectType):
     add_connector = AddConnector.Field()
     update_connector = UpdateConnector.Field()
@@ -137,7 +159,7 @@ class Mutation(graphene.ObjectType):
 class Query(graphene.ObjectType):
     connectors = graphene.List(ConnectorType, token=graphene.String(required=True))
 
-    @superuser_required
+    @login_required
     def resolve_connectors(self, info, **_kwargs):
 
         return Connector.objects.all()

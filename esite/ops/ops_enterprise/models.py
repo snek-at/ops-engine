@@ -59,6 +59,7 @@ from wagtail.images.blocks import ImageChooserBlock
 from wagtail.core import fields
 from guesslang import Guess
 import yaml
+import hashlib
 
 # Model manager to use in Proxy model
 class ProxyManager(BaseUserManager):
@@ -183,6 +184,16 @@ class CodeLanguageStatistic(models.Model):
         GraphQLString("deletions"),
     ]
 
+    def for_publish(self, hashing: bool):
+        return {
+            "name": self.name,
+            "type": self.type,
+            "color": self.color,
+            "primary_extension": self.primary_extension,
+            "insertions": self.insertions,
+            "deletions": self.deletions,
+        }
+
 
 class CodeTransitionStatistic(models.Model):
     page = ParentalKey(
@@ -201,6 +212,13 @@ class CodeTransitionStatistic(models.Model):
         GraphQLString("deletions"),
         GraphQLString("datetime"),
     ]
+
+    def for_publish(self, hashing: bool):
+        return {
+            "insertions": self.insertions,
+            "deletions": self.deletions,
+            "datetime": str(self.datetime.date()),
+        }
 
 
 class Contributor(ClusterableModel):
@@ -244,6 +262,27 @@ class Contributor(ClusterableModel):
             "ops_enterprise.CodeTransitionStatistic",
         ),
     ]
+
+    def for_publish(self, hashing: bool):
+        if hashing:
+            return {
+                "name": hashlib.sha256(str(self.name).encode("utf-8")).hexdigest(),
+                "username": hashlib.sha256(
+                    str(self.username).encode("utf-8")
+                ).hexdigest(),
+                "active": self.active,
+                "avatar": None,
+                "codelanguages": self.codelanguages,
+                "codetransition": self.codetransition,
+            }
+        return {
+            "name": self.name,
+            "username": self.username,
+            "active": self.active,
+            "avatar": None,
+            "codelanguages": self.codelanguages,
+            "codetransition": self.codetransition,
+        }
 
     def __str__(self):
         return f"{self.username}"
@@ -292,6 +331,14 @@ class ProjectContributor(ClusterableModel):
             "ops_enterprise.CodeTransitionStatistic",
         ),
     ]
+
+    def for_publish(self, hashing: bool):
+        return {
+            "name": hashlib.sha256(str(self.name).encode("utf-8")).hexdigest(),
+            "username": hashlib.sha256(str(self.username).encode("utf-8")).hexdigest(),
+            "active": self.active,
+            "avatar": None,
+        }
 
     def __str__(self):
         return f"{self.username}"
@@ -354,6 +401,39 @@ class Project(ClusterableModel):
         ),
     ]
 
+    def for_publish(self, hashing: bool):
+        if hashing:
+            return {
+                "name": hashlib.sha256(str(self.name).encode("utf-8")).hexdigest(),
+                "url": hashlib.sha256(str(self.url).encode("utf-8")).hexdigest(),
+                "description": hashlib.sha256(
+                    str(self.description).encode("utf-8")
+                ).hexdigest(),
+                "owner_name": hashlib.sha256(
+                    str(self.owner_name).encode("utf-8")
+                ).hexdigest(),
+                "owner_username": hashlib.sha256(
+                    str(self.owner_username).encode("utf-8")
+                ).hexdigest(),
+                "owner_email": hashlib.sha256(
+                    str(self.owner_email).encode("utf-8")
+                ).hexdigest(),
+                "contributors": self.contributors,
+                "codelanguages": self.codelanguages,
+                "codetransition": self.codetransition,
+            }
+        return {
+            "name": self.name,
+            "url": self.url,
+            "description": self.description,
+            "owner_name": self.owner_name,
+            "owner_username": self.owner_username,
+            "owner_email": self.owner_email,
+            "contributors": self.contributors,
+            "codelanguages": self.codelanguages,
+            "codetransition": self.codetransition,
+        }
+
 
 # > Pages
 class EnterpriseFormField(AbstractFormField):
@@ -384,6 +464,9 @@ class EnterpriseFormPage(BaseEmailFormPage):
             GraphQLForeignKey,
             "enterprise_contribution_feed",
             "ops_enterprise.ContributionFeed",
+        ),
+        GraphQLCollection(
+            GraphQLForeignKey, "connector_scp_page", "ops_connector.Connector",
         ),
     ]
     # Contributors
@@ -446,10 +529,11 @@ class EnterpriseFormPage(BaseEmailFormPage):
     employee_count = models.CharField(null=True, blank=True, max_length=255)
     opensource_url = models.URLField(null=True, blank=True)
     recruiting_url = models.URLField(null=True, blank=True)
-    description = models.CharField(null=True, blank=True, max_length=255)
+    description = models.TextField(null=True, blank=True)
 
     imprint_panels = [
         FieldPanel("imprint_tab_name"),
+        InlinePanel("connector_scp_page"),
         MultiFieldPanel(
             [
                 FieldPanel("city"),

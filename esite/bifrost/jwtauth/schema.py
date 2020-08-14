@@ -7,6 +7,7 @@ from ..types.pages import Page
 from ..registry import registry
 
 from esite.bifrost.permissions import with_page_permissions
+from django.contrib.auth.decorators import user_passes_test
 
 # Create your registration related graphql schemes here.
 
@@ -17,9 +18,11 @@ class ObtainJSONWebToken(graphql_jwt.JSONWebTokenMutation):
     profile = graphene.Field(Page)
 
     @classmethod
+    # @user_passes_test(lambda u: not u.is_superuser)
     def resolve(cls, root, info, **kwargs):
         user = info.context.user
         profilequery = wagtailPage.objects.filter(slug=f"{user.username}")
+
         return cls(
             user=info.context.user,
             profile=with_page_permissions(info.context, profilequery.specific())
