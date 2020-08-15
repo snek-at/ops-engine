@@ -729,16 +729,14 @@ class EnterpriseFormPage(BaseEmailFormPage):
                             project_contributor,
                             created,
                         ) = ProjectContributor.objects.get_or_create(
-                            project=p,
-                            name=event["committer_name"],
-                            username=event["committer_email"],
+                            project=p, username=event["committer_email"],
                         )
+                        project_contributor.name = event["committer_name"]
 
                         contributor, created = Contributor.objects.get_or_create(
-                            page=self,
-                            name=event["committer_name"],
-                            username=event["committer_email"],
+                            page=self, username=event["committer_email"],
                         )
+                        contributor.name = event["committer_name"]
 
                         try:
                             files = event["asset"]["Log"]["files"]
@@ -770,15 +768,20 @@ class EnterpriseFormPage(BaseEmailFormPage):
                                 ) = CodeLanguageStatistic.objects.get_or_create(
                                     page=self,
                                     name=language_name,
+                                    primary_extension=langguage_statistic[
+                                        "primary_extension"
+                                    ],
                                     type=langguage_statistic["type"],
                                     color=langguage_statistic["color"]
                                     if langguage_statistic["color"]
                                     else "#8C92AC",
-                                    primary_extension=langguage_statistic[
-                                        "primary_extension"
-                                    ],
-                                    insertions=file["insertions"],
-                                    deletions=file["deletions"],
+                                )
+
+                                code_language_statistic.insertions += (
+                                    file["insertions"],
+                                )
+                                code_language_statistic.deletions += (
+                                    file["deletions"],
                                 )
                                 print("reached")
 
