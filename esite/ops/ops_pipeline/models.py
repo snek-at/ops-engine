@@ -105,7 +105,7 @@ class Pipeline(models.Model):
         self.save()
 
         # update enterprise pages
-        updatePages()
+        # updatePages()
 
     def __str__(self):
         # latest_activity = PipelineActivity.objects.filter(pipeline=self).last()
@@ -194,7 +194,7 @@ class OpsPipelineFormPage(AbstractEmailForm):
         print("TRIGGER", form.cleaned_data)
         self.handle_input(
             id=form.cleaned_data["pipeline_token"],
-            raw_data=ast.literal_eval(form.cleaned_data["raw_data"]),
+            raw_data=json.loads(form.cleaned_data["raw_data"]),
         )
 
         self.get_submission_class().objects.create(
