@@ -20,6 +20,8 @@ from .models import (
 with open(os.path.join(settings.BASE_DIR, "esite/hive/languages.yaml")) as f:
     language_table = yaml.load(f, Loader=yaml.FullLoader)
 
+guesser = Guess()
+
 
 def generate_from_gitlab_with_pipline_injection(page):
     data = mongodb.get_collection("gitlab").aggregate(
@@ -105,17 +107,36 @@ def generate_from_gitlab_with_pipline_injection(page):
                     try:
                         files = event["asset"]["Log"]["files"]
                         for file in files:
+                            try:
+                                insertions = int(file["insertions"])
+                            except:
+                                insertions = 0
+
+                            try:
+                                deletions = int(file["deletions"])
+                            except:
+                                deletions = 0
+
                             cf, created = ContributionFile.objects.get_or_create(
                                 feed=c,
-                                insertions=file["insertions"],
-                                deletions=file["deletions"],
+                                insertions=insertions,
+                                deletions=deletions,
                                 path=file["path"],
                                 raw_changes=file["raw_changes"],
                             )
 
                             # Analyse raw_changes for programming languages
-                            language_name = Guess().language_name(file["raw_changes"])
-                            langguage_statistic = language_table[language_name]
+                            language_name = guesser.language_name(file["raw_changes"])
+
+                            if not language_name:
+                                language_name = "other"
+                                langguage_statistic = {
+                                    "type": "other",
+                                    "primary_extension": "",
+                                    "color": "8C92AC",
+                                }
+                            else:
+                                langguage_statistic = language_table[language_name]
 
                             # Check if language_statistic is a subgroup of a main
                             # language, if so take group as new language_statistic
@@ -138,8 +159,8 @@ def generate_from_gitlab_with_pipline_injection(page):
                                 else "#8C92AC",
                             )
 
-                            code_language_statistic.insertions += file["insertions"]
-                            code_language_statistic.deletions += file["deletions"]
+                            code_language_statistic.insertions += insertions
+                            code_language_statistic.deletions += deletions
 
                             code_language_statistic.save()
 
@@ -188,6 +209,7 @@ def generate_from_pipeline(page):
         {"enterprise_page_slug": f"{page.slug}"}
     )
 
+    cn = 0
     for pipeline in data:
         project, created = Project.objects.get_or_create(
             page=page, url=pipeline["repository_url"]
@@ -216,77 +238,101 @@ def generate_from_pipeline(page):
             )
             contributor.name = username
 
-            for file in log_entry["files"]:
-                contribution_file, created = ContributionFile.objects.get_or_create(
-                    feed=contribution,
-                    insertions=int(file["insertions"]),
-                    deletions=int(file["deletions"]),
-                    path=file["path"],
-                    raw_changes=file["raw_changes"],
-                )
+            if "files" in log_entry and log_entry["files"] is not None:
+                for file in log_entry["files"]:
+                    try:
+                        insertions = int(file["insertions"])
+                    except:
+                        insertions = 0
 
-                # Analyse raw_changes for programming languages
-                language_name = Guess().language_name(file["raw_changes"])
-                langguage_statistic = language_table[language_name]
+                    try:
+                        deletions = int(file["deletions"])
+                    except:
+                        deletions = 0
 
-                # Check if language_statistic is a subgroup of a main
-                # language, if so take group as new language_statistic
-                if "group" in langguage_statistic:
-                    language_name = langguage_statistic["group"]
-                    langguage_statistic = language_table[language_name]
+                    contribution_file, created = ContributionFile.objects.get_or_create(
+                        feed=contribution,
+                        insertions=insertions,
+                        deletions=deletions,
+                        path=file["path"],
+                        raw_changes=file["raw_changes"],
+                    )
+                    # Analyse raw_changes for programming languages
+                    language_name = Guess().language_name(file["raw_changes"])
+                    # language_name = "Python"
 
-                (
-                    code_language_statistic,
-                    created,
-                ) = CodeLanguageStatistic.objects.get_or_create(
-                    page=page,
-                    name=language_name,
-                    primary_extension=langguage_statistic["primary_extension"],
-                    type=langguage_statistic["type"],
-                    color=langguage_statistic["color"]
-                    if "color" in langguage_statistic
-                    else "#8C92AC",
-                )
+                    if not language_name:
+                        language_name = "other"
+                        langguage_statistic = {
+                            "type": "other",
+                            "primary_extension": "",
+                            "color": "8C92AC",
+                        }
+                    else:
+                        langguage_statistic = language_table[language_name]
 
-                code_language_statistic.insertions += int(file["insertions"])
-                code_language_statistic.deletions += int(file["deletions"])
+                    # Check if language_statistic is a subgroup of a main
+                    # language, if so take group as new language_statistic
+                    if "group" in langguage_statistic:
+                        language_name = langguage_statistic["group"]
+                        langguage_statistic = language_table[language_name]
 
-                code_language_statistic.save()
+                    (
+                        code_language_statistic,
+                        created,
+                    ) = CodeLanguageStatistic.objects.get_or_create(
+                        page=page,
+                        name=language_name,
+                        primary_extension=langguage_statistic["primary_extension"],
+                        type=langguage_statistic["type"],
+                        color=langguage_statistic["color"]
+                        if "color" in langguage_statistic
+                        else "#8C92AC",
+                    )
 
-                contribution.files.add(contribution_file)
+                    code_language_statistic.insertions += insertions
+                    code_language_statistic.deletions += deletions
 
-                (
-                    code_transition_statistic,
-                    created,
-                ) = CodeTransitionStatistic.objects.get_or_create(
-                    page=page,
-                    datetime=contribution.datetime,
-                    insertions=contribution_file.insertions,
-                    deletions=contribution_file.deletions,
-                )
+                    code_language_statistic.save()
 
-                contribution.codelanguages.add(code_language_statistic)
-                project_contributor.codetransition.add(code_transition_statistic)
-                project_contributor.codelanguages.add(code_language_statistic)
-                contributor.codetransition.add(code_transition_statistic)
-                contributor.codelanguages.add(code_language_statistic)
-                project.codetransition.add(code_transition_statistic)
-                project.codelanguages.add(code_language_statistic)
+                    contribution.files.add(contribution_file)
 
-                contribution.save()
+                    (
+                        code_transition_statistic,
+                        created,
+                    ) = CodeTransitionStatistic.objects.get_or_create(
+                        page=page,
+                        datetime=contribution.datetime,
+                        insertions=contribution_file.insertions,
+                        deletions=contribution_file.deletions,
+                    )
+
+                    contribution.codelanguages.add(code_language_statistic)
+                    project_contributor.codetransition.add(code_transition_statistic)
+                    project_contributor.codelanguages.add(code_language_statistic)
+                    contributor.codetransition.add(code_transition_statistic)
+                    contributor.codelanguages.add(code_language_statistic)
+                    project.codetransition.add(code_transition_statistic)
+                    project.codelanguages.add(code_language_statistic)
+
+                    contribution.save()
+                    project_contributor.save()
+                    contributor.save()
+                    project.save()
+
+                project_contributor.contribution_feed.add(contribution)
                 project_contributor.save()
+                contributor.contribution_feed.add(contribution)
                 contributor.save()
-                project.save()
 
-            project_contributor.contribution_feed.add(contribution)
-            project_contributor.save()
-            contributor.contribution_feed.add(contribution)
-            contributor.save()
+                project.contributors.add(project_contributor)
+                project.contribution_feed.add(contribution)
 
-            project.contributors.add(project_contributor)
-            project.contribution_feed.add(contribution)
+            # The project is saved each iteration in order support incremental updates in future
+            project.save()
 
-        project.save()
+            print(cn)
+            cn += 1
 
 
 def updatePages():
