@@ -45,11 +45,3 @@ class ReadOnlyPanel(EditHandler):
             _(":"),
             self.render(),
         )
-
-
-class TestPanel(EditHandler):
-    def __init__(self, attr, *args, **kwargs):
-        self.attr = attr
-        super().__init__(*args, **kwargs)
-
-        print(self.__dict__)
