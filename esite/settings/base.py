@@ -181,7 +181,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
-AUTH_USER_MODEL = "user.User"
+AUTH_USER_MODEL = "user.SNEKUser"
 # AUTH_PROFILE_MODULE = "avatar.Avatar"
 
 # > Authentication Backend
@@ -245,11 +245,11 @@ WAGTAILSEARCH_BACKENDS = {
 
 # Custom document model
 # https://docs.wagtail.io/en/stable/advanced_topics/documents/custom_document_model.html
-WAGTAILDOCS_DOCUMENT_MODEL = "documents.CustomDocument"
+WAGTAILDOCS_DOCUMENT_MODEL = "documents.SNEKDocument"
 
 # Custom image model
 # https://docs.wagtail.io/en/stable/advanced_topics/images/custom_image_model.html
-WAGTAILIMAGES_IMAGE_MODEL = "images.CustomImage"
+WAGTAILIMAGES_IMAGE_MODEL = "images.SNEKImage"
 WAGTAILIMAGES_FEATURE_DETECTION_ENABLED = False
 
 # Rich text settings to remove unneeded features
