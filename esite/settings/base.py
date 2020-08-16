@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "wagtail.admin",
     "wagtail.core",
     # Third party apps
+    "django_crontab",
     "corsheaders",
     "django_filters",
     "modelcluster",
@@ -297,6 +298,12 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
 }
 
 
+# Crontab
+CRONJOBS = [
+    ("0 */1 * * *", "esite.hive.hive_gitlab.cron.run_analysis",),
+    ("0 */2 * * *", "esite.hive.hive_enterprise.cron.build_enterprise_page",),
+]
+CRONTAB_COMMAND_SUFFIX = "2>&1"
 
 # Wagtail upload
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 9999999999999
