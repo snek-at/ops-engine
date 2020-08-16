@@ -8,65 +8,96 @@ import modelcluster.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ops_enterprise', '0001_initial'),
+        ("ops_enterprise", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ProjectContributor',
+            name="ProjectContributor",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(default='Unkown', max_length=255, null=True)),
-                ('username', models.CharField(default='Unkown', max_length=255, null=True)),
-                ('active', models.BooleanField(default=True)),
-                ('avatar', models.ImageField(null=True, upload_to='')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(default="Unkown", max_length=255, null=True)),
+                (
+                    "username",
+                    models.CharField(default="Unkown", max_length=255, null=True),
+                ),
+                ("active", models.BooleanField(default=True)),
+                ("avatar", models.ImageField(null=True, upload_to="")),
             ],
-            options={
-                'abstract': False,
-            },
+            options={"abstract": False,},
         ),
-        migrations.RemoveField(
-            model_name='contributor',
-            name='project',
+        migrations.RemoveField(model_name="contributor", name="project",),
+        migrations.AddField(
+            model_name="codelanguagestatistic",
+            name="primary_extension",
+            field=models.CharField(default="Unkown", max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='codelanguagestatistic',
-            name='primary_extension',
-            field=models.CharField(default='Unkown', max_length=255, null=True),
+            model_name="codelanguagestatistic",
+            name="type",
+            field=models.CharField(default="Unkown", max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='codelanguagestatistic',
-            name='type',
-            field=models.CharField(default='Unkown', max_length=255, null=True),
-        ),
-        migrations.AddField(
-            model_name='contributionfeed',
-            name='codelanguages',
-            field=modelcluster.fields.ParentalManyToManyField(blank=True, related_name='contributionfeed_codelanguages', to='ops_enterprise.CodeLanguageStatistic'),
+            model_name="contributionfeed",
+            name="codelanguages",
+            field=modelcluster.fields.ParentalManyToManyField(
+                blank=True,
+                related_name="contributionfeed_codelanguages",
+                to="ops_enterprise.CodeLanguageStatistic",
+            ),
         ),
         migrations.AlterField(
-            model_name='project',
-            name='contributors',
-            field=modelcluster.fields.ParentalManyToManyField(blank=True, related_name='project_contributor', to='ops_enterprise.ProjectContributor'),
+            model_name="project",
+            name="contributors",
+            field=modelcluster.fields.ParentalManyToManyField(
+                blank=True,
+                related_name="project_contributor",
+                to="ops_enterprise.ProjectContributor",
+            ),
         ),
         migrations.AddField(
-            model_name='projectcontributor',
-            name='codelanguages',
-            field=modelcluster.fields.ParentalManyToManyField(blank=True, related_name='projectcontributor_codelanguages', to='ops_enterprise.CodeLanguageStatistic'),
+            model_name="projectcontributor",
+            name="codelanguages",
+            field=modelcluster.fields.ParentalManyToManyField(
+                blank=True,
+                related_name="projectcontributor_codelanguages",
+                to="ops_enterprise.CodeLanguageStatistic",
+            ),
         ),
         migrations.AddField(
-            model_name='projectcontributor',
-            name='codetransition',
-            field=modelcluster.fields.ParentalManyToManyField(blank=True, related_name='projectcontributor_codetransition', to='ops_enterprise.CodeTransitionStatistic'),
+            model_name="projectcontributor",
+            name="codetransition",
+            field=modelcluster.fields.ParentalManyToManyField(
+                blank=True,
+                related_name="projectcontributor_codetransition",
+                to="ops_enterprise.CodeTransitionStatistic",
+            ),
         ),
         migrations.AddField(
-            model_name='projectcontributor',
-            name='contribution_feed',
-            field=modelcluster.fields.ParentalManyToManyField(blank=True, related_name='projectcontributor_feed', to='ops_enterprise.ContributionFeed'),
+            model_name="projectcontributor",
+            name="contribution_feed",
+            field=modelcluster.fields.ParentalManyToManyField(
+                blank=True,
+                related_name="projectcontributor_feed",
+                to="ops_enterprise.ContributionFeed",
+            ),
         ),
         migrations.AddField(
-            model_name='projectcontributor',
-            name='project',
-            field=modelcluster.fields.ParentalKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='project_projectcontributor', to='ops_enterprise.Project'),
+            model_name="projectcontributor",
+            name="project",
+            field=modelcluster.fields.ParentalKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="project_projectcontributor",
+                to="ops_enterprise.Project",
+            ),
         ),
     ]

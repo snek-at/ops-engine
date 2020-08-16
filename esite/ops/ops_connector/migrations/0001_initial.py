@@ -10,81 +10,240 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('wagtailcore', '0045_assign_unlock_grouppagepermission'),
+        ("wagtailcore", "0045_assign_unlock_grouppagepermission"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Connector',
+            name="Connector",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, null=True)),
-                ('description', models.CharField(blank=True, max_length=255, null=True)),
-                ('url', models.URLField(max_length=255, null=True)),
-                ('token', models.CharField(blank=True, help_text='Warning! Changing the token affects the connection to all endpoints.', max_length=255, null=True)),
-                ('created', models.DateTimeField(auto_now_add=True, null=True)),
-                ('updated', models.DateTimeField(auto_now=True, null=True)),
-                ('active', models.BooleanField(default=True)),
-                ('privileges_mode', models.CharField(choices=[('POLP', 'Principle of least privilege'), ('IDC', 'Open privilege')], default='POLP', max_length=255)),
-                ('share_mode', models.CharField(choices=[('ISOLATE', 'Prohibit external authentication - Prohibit company page publishing'), ('MEDIUM', 'Prohibit external authentication - Allow company page publishing'), ('OPEN', 'Allow external authentication - Allow company page publishing')], default='ISOLATE', max_length=255)),
-                ('share_projects', models.BooleanField(default=True)),
-                ('share_users', models.BooleanField(default=True)),
-                ('share_company_name', models.BooleanField(default=True)),
-                ('share_company_recruiting', models.BooleanField(default=True)),
-                ('share_company_recruement_url', models.BooleanField(default=True)),
-                ('share_company_description', models.BooleanField(default=True)),
-                ('share_company_employees_count', models.BooleanField(default=True)),
-                ('share_company_vat', models.BooleanField(default=True)),
-                ('share_company_email', models.BooleanField(default=True)),
-                ('share_company_opensource_status', models.BooleanField(default=True)),
-                ('share_company_opensource_url', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255, null=True)),
+                (
+                    "description",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("url", models.URLField(max_length=255, null=True)),
+                (
+                    "token",
+                    models.CharField(
+                        blank=True,
+                        help_text="Warning! Changing the token affects the connection to all endpoints.",
+                        max_length=255,
+                        null=True,
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True, null=True)),
+                ("updated", models.DateTimeField(auto_now=True, null=True)),
+                ("active", models.BooleanField(default=True)),
+                (
+                    "privileges_mode",
+                    models.CharField(
+                        choices=[
+                            ("POLP", "Principle of least privilege"),
+                            ("IDC", "Open privilege"),
+                        ],
+                        default="POLP",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "share_mode",
+                    models.CharField(
+                        choices=[
+                            (
+                                "ISOLATE",
+                                "Prohibit external authentication - Prohibit company page publishing",
+                            ),
+                            (
+                                "MEDIUM",
+                                "Prohibit external authentication - Allow company page publishing",
+                            ),
+                            (
+                                "OPEN",
+                                "Allow external authentication - Allow company page publishing",
+                            ),
+                        ],
+                        default="ISOLATE",
+                        max_length=255,
+                    ),
+                ),
+                ("share_projects", models.BooleanField(default=True)),
+                ("share_users", models.BooleanField(default=True)),
+                ("share_company_name", models.BooleanField(default=True)),
+                ("share_company_recruiting", models.BooleanField(default=True)),
+                ("share_company_recruement_url", models.BooleanField(default=True)),
+                ("share_company_description", models.BooleanField(default=True)),
+                ("share_company_employees_count", models.BooleanField(default=True)),
+                ("share_company_vat", models.BooleanField(default=True)),
+                ("share_company_email", models.BooleanField(default=True)),
+                ("share_company_opensource_status", models.BooleanField(default=True)),
+                ("share_company_opensource_url", models.BooleanField(default=True)),
             ],
         ),
         migrations.CreateModel(
-            name='ConnectorFormPage',
+            name="ConnectorFormPage",
             fields=[
-                ('page_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='wagtailcore.Page')),
-                ('to_address', models.CharField(blank=True, help_text='Optional - form submissions will be emailed to these addresses. Separate multiple addresses by comma.', max_length=255, verbose_name='to address')),
-                ('from_address', models.CharField(blank=True, max_length=255, verbose_name='from address')),
-                ('subject', models.CharField(blank=True, max_length=255, verbose_name='subject')),
-                ('head', models.CharField(max_length=255, null=True)),
-                ('description', models.CharField(max_length=255, null=True)),
+                (
+                    "page_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="wagtailcore.Page",
+                    ),
+                ),
+                (
+                    "to_address",
+                    models.CharField(
+                        blank=True,
+                        help_text="Optional - form submissions will be emailed to these addresses. Separate multiple addresses by comma.",
+                        max_length=255,
+                        verbose_name="to address",
+                    ),
+                ),
+                (
+                    "from_address",
+                    models.CharField(
+                        blank=True, max_length=255, verbose_name="from address"
+                    ),
+                ),
+                (
+                    "subject",
+                    models.CharField(
+                        blank=True, max_length=255, verbose_name="subject"
+                    ),
+                ),
+                ("head", models.CharField(max_length=255, null=True)),
+                ("description", models.CharField(max_length=255, null=True)),
             ],
-            options={
-                'abstract': False,
-            },
-            bases=('wagtailcore.page',),
+            options={"abstract": False,},
+            bases=("wagtailcore.page",),
         ),
         migrations.CreateModel(
-            name='ConnectorFormSubmission',
+            name="ConnectorFormSubmission",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('form_data', models.TextField()),
-                ('submit_time', models.DateTimeField(auto_now_add=True, verbose_name='submit time')),
-                ('page', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='wagtailcore.Page')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("form_data", models.TextField()),
+                (
+                    "submit_time",
+                    models.DateTimeField(auto_now_add=True, verbose_name="submit time"),
+                ),
+                (
+                    "page",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="wagtailcore.Page",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'form submission',
-                'verbose_name_plural': 'form submissions',
-                'abstract': False,
+                "verbose_name": "form submission",
+                "verbose_name_plural": "form submissions",
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ConnectorFormField',
+            name="ConnectorFormField",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sort_order', models.IntegerField(blank=True, editable=False, null=True)),
-                ('label', models.CharField(help_text='The label of the form field', max_length=255, verbose_name='label')),
-                ('field_type', models.CharField(choices=[('singleline', 'Single line text'), ('multiline', 'Multi-line text'), ('email', 'Email'), ('number', 'Number'), ('url', 'URL'), ('checkbox', 'Checkbox'), ('checkboxes', 'Checkboxes'), ('dropdown', 'Drop down'), ('multiselect', 'Multiple select'), ('radio', 'Radio buttons'), ('date', 'Date'), ('datetime', 'Date/time'), ('hidden', 'Hidden field')], max_length=16, verbose_name='field type')),
-                ('required', models.BooleanField(default=True, verbose_name='required')),
-                ('choices', models.TextField(blank=True, help_text='Comma separated list of choices. Only applicable in checkboxes, radio and dropdown.', verbose_name='choices')),
-                ('default_value', models.CharField(blank=True, help_text='Default value. Comma separated values supported for checkboxes.', max_length=255, verbose_name='default value')),
-                ('help_text', models.CharField(blank=True, max_length=255, verbose_name='help text')),
-                ('page', modelcluster.fields.ParentalKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='form_fields', to='ops_connector.ConnectorFormPage')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "sort_order",
+                    models.IntegerField(blank=True, editable=False, null=True),
+                ),
+                (
+                    "label",
+                    models.CharField(
+                        help_text="The label of the form field",
+                        max_length=255,
+                        verbose_name="label",
+                    ),
+                ),
+                (
+                    "field_type",
+                    models.CharField(
+                        choices=[
+                            ("singleline", "Single line text"),
+                            ("multiline", "Multi-line text"),
+                            ("email", "Email"),
+                            ("number", "Number"),
+                            ("url", "URL"),
+                            ("checkbox", "Checkbox"),
+                            ("checkboxes", "Checkboxes"),
+                            ("dropdown", "Drop down"),
+                            ("multiselect", "Multiple select"),
+                            ("radio", "Radio buttons"),
+                            ("date", "Date"),
+                            ("datetime", "Date/time"),
+                            ("hidden", "Hidden field"),
+                        ],
+                        max_length=16,
+                        verbose_name="field type",
+                    ),
+                ),
+                (
+                    "required",
+                    models.BooleanField(default=True, verbose_name="required"),
+                ),
+                (
+                    "choices",
+                    models.TextField(
+                        blank=True,
+                        help_text="Comma separated list of choices. Only applicable in checkboxes, radio and dropdown.",
+                        verbose_name="choices",
+                    ),
+                ),
+                (
+                    "default_value",
+                    models.CharField(
+                        blank=True,
+                        help_text="Default value. Comma separated values supported for checkboxes.",
+                        max_length=255,
+                        verbose_name="default value",
+                    ),
+                ),
+                (
+                    "help_text",
+                    models.CharField(
+                        blank=True, max_length=255, verbose_name="help text"
+                    ),
+                ),
+                (
+                    "page",
+                    modelcluster.fields.ParentalKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="form_fields",
+                        to="ops_connector.ConnectorFormPage",
+                    ),
+                ),
             ],
-            options={
-                'ordering': ['sort_order'],
-                'abstract': False,
-            },
+            options={"ordering": ["sort_order"], "abstract": False,},
         ),
     ]

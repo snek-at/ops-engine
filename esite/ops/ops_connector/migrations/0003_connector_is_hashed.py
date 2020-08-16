@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ops_connector', '0002_connector_enterprise_page'),
+        ("ops_connector", "0002_connector_enterprise_page"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='connector',
-            name='is_hashed',
+            model_name="connector",
+            name="is_hashed",
             field=models.BooleanField(default=True),
         ),
     ]

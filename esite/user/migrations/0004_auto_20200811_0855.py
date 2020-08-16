@@ -8,24 +8,39 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('auth', '0011_update_proxy_permissions'),
-        ('user', '0003_auto_20200809_1716'),
+        ("auth", "0011_update_proxy_permissions"),
+        ("user", "0003_auto_20200809_1716"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SNEKGroup',
+            name="SNEKGroup",
             fields=[
-                ('group_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='auth.Group')),
+                (
+                    "group_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="auth.Group",
+                    ),
+                ),
             ],
-            bases=('auth.group',),
-            managers=[
-                ('objects', django.contrib.auth.models.GroupManager()),
-            ],
+            bases=("auth.group",),
+            managers=[("objects", django.contrib.auth.models.GroupManager()),],
         ),
         migrations.AlterField(
-            model_name='snekuser',
-            name='groups',
-            field=models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='user.SNEKGroup', verbose_name='groups'),
+            model_name="snekuser",
+            name="groups",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="The groups this user belongs to. A user will get all permissions granted to each of their groups.",
+                related_name="user_set",
+                related_query_name="user",
+                to="user.SNEKGroup",
+                verbose_name="groups",
+            ),
         ),
     ]
