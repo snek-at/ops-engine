@@ -23,17 +23,20 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 # Django installation.
 # See https://docs.djangoproject.com/en/stable/ref/settings/#installed-apps
 INSTALLED_APPS = [
-    # Our own pages
-    "esite.home",
     # Our own apps
     "esite.bifrost",
     "esite.core",
+    "esite.utils",
     "esite.user",
-    "esite.colorfield",
     "esite.documents",
     "esite.images",
     "esite.navigation",
-    "esite.utils",
+    "esite.colorfield",
+    # Our hive apps
+    "esite.hive.hive_enterprise",
+    "esite.hive.hive_gitlab",
+    "esite.hive.hive_connector",
+    "esite.hive.hive_pipeline",
     # Django core apps
     "django.contrib.admin",
     "django.contrib.auth",
@@ -163,10 +166,16 @@ GRAPHQL_JWT = {
 }
 
 BIFROST_APPS = {
-    "home": "",
     "utils": "",
     "documents": "",
     "images": "",
+    "user": "",
+    "navigation": "",
+    # Our hive apps
+    "hive_enterprise": "",
+    "hive_gitlab": "",
+    "hive_connector": "",
+    "hive_pipeline": "",
 }
 
 # > Password Validation
