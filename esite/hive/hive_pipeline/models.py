@@ -89,11 +89,16 @@ class Pipeline(models.Model):
         if "Git" not in raw_data:
             return Exception("Key: `Git` not valid")
 
+        repository_url = raw_data["Git"]["git_url"].rstrip("\n")
+
         mongodb.get_collection("pipeline").update(
             {"pipeline_id": self.id},
             {
                 "$addToSet": {"Log": {"$each": raw_data["Log"]},},
-                "$set": {"enterprise_page_slug": self.enterprise_page.slug,},
+                "$set": {
+                    "enterprise_page_slug": self.enterprise_page.slug,
+                    "repository_url": repository_url,
+                },
             },
             upsert=True,
         )
