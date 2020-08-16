@@ -296,6 +296,11 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
     },
 }
 
+
+
+# Wagtail upload
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 9999999999999
+
 # Default size of the pagination used on the front-end
 DEFAULT_PER_PAGE = 10
 
