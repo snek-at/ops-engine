@@ -70,8 +70,8 @@ class SNEKUser(AbstractUser):
                     fail_silently=False,
                 )
 
-        else:
-            self.is_active = False
+        # else:
+        #     self.is_active = False
 
         super(SNEKUser, self).save(*args, **kwargs)
 
