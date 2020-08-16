@@ -28,10 +28,10 @@ class UserManagementAdmin(ModelAdminGroup):
     menu_order = 110
     add_to_settings_menu = False
     exclude_from_explorer = False
-    items = UserAdmin
+    items = (UserAdmin,)
 
 
-# modeladmin_register(UserManagementAdmin)
+modeladmin_register(UserManagementAdmin)
 
 # SPDX-License-Identifier: (EUPL-1.2)
 # Copyright © 2019-2020 Simon Prast

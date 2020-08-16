@@ -52,23 +52,13 @@ class SNEKUser(AbstractUser):
         validators=[django.contrib.auth.validators.UnicodeUsernameValidator()],
     )
     is_enterprise = models.BooleanField("enterprise", blank=False, default=False)
-    cache = models.TextField(null=True, blank=False)
-    groups = models.ManyToManyField(
-        Group,
-        verbose_name="groups",
-        blank=True,
-        help_text="The groups this user belongs to. A user will get all permissions "
-        "granted to each of their groups.",
-        related_name="user_set",
-        related_query_name="user",
-    )
 
     # Custom save function
     def save(self, *args, **kwargs):
         if not self.username:
             self.username = str(uuid.uuid4())
 
-        if not self.is_staff or self.is_enterprise:
+        if not self.is_staff:
             if not self.is_active:
                 self.is_active = True
 
@@ -92,8 +82,6 @@ class SNEKUser(AbstractUser):
         FieldPanel("email"),
         FieldPanel("is_staff"),
         FieldPanel("is_active"),
-        FieldPanel("is_enterprise"),
-        FieldPanel("cache"),
     ]
 
     graphql_fields = [
