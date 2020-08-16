@@ -80,6 +80,9 @@ if getattr(settings, "PATTERN_LIBRARY_ENABLED", False) and apps.is_installed(
     ]
 
 
+# Set public URLs to use the "default" cache settings.
+urlpatterns = decorate_urlpatterns(urlpatterns, get_default_cache_control_decorator())
+
 # Set vary header to instruct cache to serve different version on different
 # cookies, different request method (e.g. AJAX) and different protocol
 # (http vs https).
