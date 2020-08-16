@@ -94,10 +94,8 @@ class Gitlab(models.Model):
             if self.privileges_mode == "POLP"
             else "",
         ):
-            # print(_projects)
             # > Get all members of each project
             for project in _projects:
-                print("PROJECT", project)
                 project["members"] = []
                 project["events"] = []
 

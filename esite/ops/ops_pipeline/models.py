@@ -83,14 +83,11 @@ class Pipeline(models.Model):
     ]
 
     def analyse(self, raw_data: dict):
-        print("analysing")
         from ...core.services import mongodb
         from ..ops_enterprise.services import updatePages
 
         if "Git" not in raw_data:
             return Exception("Key: `Git` not valid")
-
-        print(raw_data["Git"])
 
         mongodb.get_collection("pipeline").update(
             {"pipeline_id": self.id},
@@ -191,7 +188,6 @@ class OpsPipelineFormPage(AbstractEmailForm):
         )
 
     def process_form_submission(self, form):
-        print("TRIGGER", form.cleaned_data)
         self.handle_input(
             id=form.cleaned_data["pipeline_token"],
             raw_data=json.loads(form.cleaned_data["raw_data"]),

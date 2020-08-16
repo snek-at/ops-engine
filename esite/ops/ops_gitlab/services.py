@@ -23,7 +23,6 @@ class GitLabScraper:
     def gen_request(self, url, **kwargs):
         options = {"goto_page": 0, "optional_parameter": ""}
         options.update(kwargs)
-        print("req:", url, kwargs, self.headers)
         resp = requests.get(
             (
                 f"{url}?page={options['goto_page']}&per_page=100&{options['optional_parameter']}"

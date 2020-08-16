@@ -683,14 +683,6 @@ class EnterpriseFormPage(BaseEmailFormPage):
         with open(os.path.join(settings.BASE_DIR, "languages.yaml")) as f:
             language_table = yaml.load(f, Loader=yaml.FullLoader)
 
-        # print(data)
-        # Project.objects.all().delete()
-        # Contributor.objects.all().delete()
-        # ContributionFeed.objects.all().delete()
-        # CodeLanguageStatistic.objects.all().delete()
-        # CodeTransitionStatistic.objects.all().delete()
-        # ContributionFile.objects.all().delete()
-
         for project in data:
             # print(project)
             if bool(project):
@@ -714,7 +706,6 @@ class EnterpriseFormPage(BaseEmailFormPage):
                         elif "created_date" in event:
                             date = event["created_date"]
 
-                        print(event)
                         c, created = ContributionFeed.objects.get_or_create(
                             page=self,
                             type="commit",
@@ -722,8 +713,6 @@ class EnterpriseFormPage(BaseEmailFormPage):
                             cid=event["id"],
                             message=event["message"],
                         )
-
-                        print("pp", p.name)
 
                         (
                             project_contributor,

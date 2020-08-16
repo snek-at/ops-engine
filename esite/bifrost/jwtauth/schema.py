@@ -54,7 +54,6 @@ class ObtainPrivilegedJSONWebToken(graphene.Mutation):
     @graphql_jwt.decorators.staff_member_required
     @graphql_jwt.decorators.token_auth
     def mutate(cls, root, info, **kwargs):
-        # print(root, info.context.token)
         return ObtainPrivilegedJSONWebToken()
 
     @classmethod

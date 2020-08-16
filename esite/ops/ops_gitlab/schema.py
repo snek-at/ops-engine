@@ -84,7 +84,6 @@ class UpdateGitlab(graphene.Mutation):
 
     @login_required
     def mutate(self, info, token, id, enterprise_page_slug=None, **kwargs):
-        print(kwargs)
         from ..ops_enterprise.models import EnterpriseFormPage
 
         page = EnterpriseFormPage.objects.filter(slug=enterprise_page_slug).first()
@@ -94,8 +93,6 @@ class UpdateGitlab(graphene.Mutation):
         else:
             if enterprise_page_slug:
                 kwargs["enterprise_page"] = None
-
-        print(kwargs)
 
         if kwargs.get("gitlab_token"):
             kwargs["token"] = kwargs.get("gitlab_token")

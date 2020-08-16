@@ -140,12 +140,9 @@ class PublishPageViaConnector(graphene.Mutation):
     def mutate(self, info, token, connector_id, **kwargs):
         success = True
         try:
-            print(connector_id)
             c = Connector.objects.get(id=connector_id)
-            print(c)
             c.publish()
         except Exception as ex:
-            print(ex)
             success = False
 
         return PublishPageViaConnector(success=success)
