@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "esite.hive.hive_gitlab",
     "esite.hive.hive_connector",
     "esite.hive.hive_pipeline",
+    "esite.hive.ops_admin",
     # Django core apps
     "django.contrib.admin",
     "django.contrib.auth",
@@ -107,7 +108,10 @@ ROOT_URLCONF = "esite.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(PROJECT_DIR, "templates"),],
+        "DIRS": [
+            os.path.join(PROJECT_DIR, "templates"),
+            os.path.join(PROJECT_DIR, "frontend/build"),
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -218,6 +222,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/stable/ref/settings/#staticfiles-dirs
 STATICFILES_DIRS = [
     os.path.join(PROJECT_DIR, "static"),
+    os.path.join(PROJECT_DIR, "frontend/build/static"),
 ]
 
 # This is where Django will put files collected from application directories
