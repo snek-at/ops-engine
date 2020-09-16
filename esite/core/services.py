@@ -9,7 +9,7 @@ mongoclient = MongoClient(
 
 mongodb = mongoclient.get_database("ops_analytics")
 
-# if not "ops_analytics" in mongoclient.list_database_names():
+# if not "hive_analytics" in mongoclient.list_database_names():
 
 # SPDX-License-Identifier: (EUPL-1.2)
 # Copyright © 2019-2020 Simon Prast

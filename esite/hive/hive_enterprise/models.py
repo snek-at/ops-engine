@@ -274,6 +274,7 @@ class Contributor(ClusterableModel):
                 "avatar": None,
                 "codelanguages": self.codelanguages,
                 "codetransition": self.codetransition,
+                "anonym": True,
             }
         return {
             "name": self.name,
@@ -333,12 +334,23 @@ class ProjectContributor(ClusterableModel):
     ]
 
     def for_publish(self, hashing: bool):
-        return {
-            "name": hashlib.sha256(str(self.name).encode("utf-8")).hexdigest(),
-            "username": hashlib.sha256(str(self.username).encode("utf-8")).hexdigest(),
-            "active": self.active,
-            "avatar": None,
-        }
+        if hashing:
+            return {
+                "name": hashlib.sha256(str(self.name).encode("utf-8")).hexdigest(),
+                "username": hashlib.sha256(
+                    str(self.username).encode("utf-8")
+                ).hexdigest(),
+                "active": self.active,
+                "avatar": None,
+                "anonym": True,
+            }
+        else:
+            return {
+                "name": self.name,
+                "username": self.username,
+                "active": self.active,
+                "avatar": None,
+            }
 
     def __str__(self):
         return f"{self.username}"
@@ -421,6 +433,7 @@ class Project(ClusterableModel):
                 "contributors": self.contributors,
                 "codelanguages": self.codelanguages,
                 "codetransition": self.codetransition,
+                "anonym": True,
             }
         return {
             "name": self.name,
@@ -511,6 +524,13 @@ class EnterpriseFormPage(BaseEmailFormPage):
     ]
 
     # Imprint
+    avatar_image = models.ForeignKey(
+        settings.WAGTAILIMAGES_IMAGE_MODEL,
+        null=True,
+        blank=True,
+        related_name="+",
+        on_delete=models.SET_NULL,
+    )
     imprint_tab_name = models.CharField(null=True, blank=True, max_length=255)
     city = models.CharField(null=True, blank=True, max_length=255)
     zip_code = models.CharField(null=True, blank=True, max_length=255)
@@ -532,6 +552,7 @@ class EnterpriseFormPage(BaseEmailFormPage):
     description = models.TextField(null=True, blank=True)
 
     imprint_panels = [
+        FieldPanel("avatar_image"),
         FieldPanel("imprint_tab_name"),
         InlinePanel("connector_scp_page"),
         MultiFieldPanel(
@@ -570,6 +591,7 @@ class EnterpriseFormPage(BaseEmailFormPage):
     ]
 
     graphql_fields += [
+        GraphQLImage("avatar_image"),
         GraphQLString("imprint_tab_name"),
         GraphQLString("city"),
         GraphQLString("zip_code"),
@@ -621,10 +643,10 @@ class EnterpriseFormPage(BaseEmailFormPage):
         [
             # ObjectList(Page.content_panels + overview_panels, heading="Overview"),
             ObjectList(Page.content_panels, heading="Overview"),
-            ObjectList(codelangaugestatistic_panel, heading="Language Statistic"),
-            ObjectList(codetransitionstatistic_panel, heading="Transition Statistic"),
-            ObjectList(contributor_panel, heading="Contributors"),
-            ObjectList(project_panel, heading="Projects"),
+            # ObjectList(codelangaugestatistic_panel, heading="Language Statistic"),
+            # ObjectList(codetransitionstatistic_panel, heading="Transition Statistic"),
+            # ObjectList(contributor_panel, heading="Contributors"),
+            # ObjectList(project_panel, heading="Projects"),
             ObjectList(imprint_panels, heading="Imprint"),
             ObjectList(form_panels, heading="Form"),
             ObjectList(
@@ -642,6 +664,60 @@ class EnterpriseFormPage(BaseEmailFormPage):
         # now make your additional modifications
         if not self.slug.startswith("e-"):
             self.slug = f"e-{self.slug}"
+
+    def save(self, *args, **kwargs):
+        # if self.pk is None:
+        self.form_fields.add(
+            EnterpriseFormField(
+                label="court_of_registry", field_type="singleline", required=False,
+            ),
+            EnterpriseFormField(
+                label="description", field_type="multiline", required=False,
+            ),
+            EnterpriseFormField(label="email", field_type="email", required=False,),
+            EnterpriseFormField(
+                label="employee_count", field_type="singleline", required=False,
+            ),
+            EnterpriseFormField(
+                label="opensource_url", field_type="singleline", required=False,
+            ),
+            EnterpriseFormField(
+                label="ownership", field_type="singleline", required=False,
+            ),
+            EnterpriseFormField(
+                label="place_of_registry", field_type="singleline", required=False,
+            ),
+            EnterpriseFormField(
+                label="recruiting_url", field_type="singleline", required=False,
+            ),
+            EnterpriseFormField(
+                label="tax_id", field_type="singleline", required=False,
+            ),
+            EnterpriseFormField(
+                label="telefax", field_type="singleline", required=False,
+            ),
+            EnterpriseFormField(
+                label="telephone", field_type="singleline", required=False,
+            ),
+            EnterpriseFormField(
+                label="title", field_type="singleline", required=False,
+            ),
+            EnterpriseFormField(
+                label="trade_register_number", field_type="singleline", required=False,
+            ),
+            EnterpriseFormField(
+                label="vat_number", field_type="singleline", required=False,
+            ),
+            EnterpriseFormField(
+                label="whatsapp_contactline", field_type="singleline", required=False,
+            ),
+            EnterpriseFormField(
+                label="whatsapp_telephone", field_type="singleline", required=False,
+            ),
+        )
+
+        # after call the built-in cleanups (including default form fields)
+        super(EnterpriseFormPage, self).save(*args, **kwargs)
 
     def get_submission_class(self):
         return EnterpriseFormSubmission

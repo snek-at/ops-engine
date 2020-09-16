@@ -214,6 +214,9 @@ def generate_from_pipeline(page):
         project, created = Project.objects.get_or_create(
             page=page, url=pipeline["repository_url"]
         )
+        project.name = (
+            pipeline["repository_url"].split("/")[-1].replace(".git", "").title()
+        )
         for log_entry in pipeline["Log"]:
             contribution, created = ContributionFeed.objects.get_or_create(
                 page=page,
