@@ -1,5 +1,6 @@
-from django.db import migrations
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db import migrations
 
 
 def create_initialuser(apps, schema_editor):
@@ -19,6 +20,13 @@ def create_initialuser(apps, schema_editor):
     adminuser.set_password("ciscocisco")
 
     adminuser.save()
+    
+    # Create hive user
+    hiveuser = User.objects.create(username="snekman")
+
+    hiveuser.set_password(settings.HIVE_PASSWORD)
+
+    hiveuser.save()
 
 
 def remove_initialuser(apps, schema_editor):
@@ -30,6 +38,9 @@ def remove_initialuser(apps, schema_editor):
 
     # Delete the admin user
     User.objects.get(username="admin").delete()
+    
+    # Delete the hive user
+    User.objects.get(username="hive").delete()
 
 
 class Migration(migrations.Migration):

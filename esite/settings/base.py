@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/stable/ref/settings/
 
 import os
 from datetime import timedelta
+from esite.settings.local import *
 
 env = os.environ.copy()
 
@@ -37,7 +38,6 @@ INSTALLED_APPS = [
     "esite.hive.hive_gitlab",
     "esite.hive.hive_connector",
     "esite.hive.hive_pipeline",
-    "esite.hive.ops_admin",
     # Django core apps
     "django.contrib.admin",
     "django.contrib.auth",
@@ -332,6 +332,11 @@ SILENCED_SYSTEM_CHECKS = ["captcha.recaptcha_test_key_error"]
 # Set this to False to limit slugs to ASCII characters.
 # Ref:https://docs.wagtail.io/en/stable/advanced_topics/settings.html#unicode-page-slugs
 WAGTAIL_ALLOW_UNICODE_SLUGS = True
+
+# > Mongo
+MONGO_HOST = "localhost:27017"
+MONGO_USER = "root"
+MONGO_PASSWORD = "rootpassword"
 
 # SPDX-License-Identifier: (EUPL-1.2)
 # Copyright © 2019-2020 Simon Prast

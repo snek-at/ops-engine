@@ -284,5 +284,16 @@ if "RECAPTCHA_PUBLIC_KEY" in env and "RECAPTCHA_PRIVATE_KEY" in env:
     RECAPTCHA_PUBLIC_KEY = env["RECAPTCHA_PUBLIC_KEY"]
     RECAPTCHA_PRIVATE_KEY = env["RECAPTCHA_PRIVATE_KEY"]
 
+# > Hive
+# These setthings are required for hive interface to work.
+if "HIVE_PASSWORD" in env:
+    HIVE_PASSWORD = env["HIVE_PASSWORD"]
+    
+# > Mongo
+if "MONGO_INITDB_ROOT_USERNAME" in env:
+    MONGO_USER = env["MONGO_INITDB_ROOT_USERNAME"]
+if "MONGO_INITDB_ROOT_PASSWORD" in env:
+    MONGO_PASSWORD = env["MONGO_INITDB_ROOT_PASSWORD"]
+
 # SPDX-License-Identifier: (EUPL-1.2)
 # Copyright © 2020 Simon Prast
