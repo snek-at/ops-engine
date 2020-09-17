@@ -338,5 +338,9 @@ MONGO_HOST = "localhost:27017"
 MONGO_USER = "root"
 MONGO_PASSWORD = "rootpassword"
 
+# > Hive
+ENTERPRISE_NAME = 'CUSTOM-ENTERPRISE-PAGE'
+
+
 # SPDX-License-Identifier: (EUPL-1.2)
 # Copyright © 2019-2020 Simon Prast

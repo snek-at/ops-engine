@@ -19,8 +19,6 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=rootpassword
     ports:
       - 27017:27017
-    volumes:
-      - mongodb_data_container:/data/db
 
   #> Django
   app:
@@ -28,6 +26,7 @@ services:
     environment:
       - "DJANGO_SECRET_KEY=changeme"
       - "DATABASE_URL=postgres://app_user:changeme@db/app_db"
+      - "DEFAULT_ENTERPRISE_NAME=snek"
     links:
       - "db:db"
     ports:
