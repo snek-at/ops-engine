@@ -1,4 +1,4 @@
-FROM python:3.7-alpine
+FROM python:3.8-alpine
 
 LABEL description="This container serves as an entry point for our future Django projects."
 
