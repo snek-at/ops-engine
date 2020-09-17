@@ -17,7 +17,7 @@ from django.apps import apps
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import TemplateView
 
@@ -37,8 +37,10 @@ from esite.utils.views import favicon, robots
 private_urlpatterns = [
     url(r"", include(api_urls)),
     path("django-admin/", admin.site.urls),
-    path("admin/", include(wagtailadmin_urls)),
+    path("ops-admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
+    re_path("", TemplateView.as_view(template_name="index.html")),
+
 ]
 
 
