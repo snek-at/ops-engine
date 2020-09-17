@@ -40,6 +40,7 @@ RUN echo "## Installing base ##" && \
     musl-dev \
     libffi-dev \
     linux-headers \
+    python3-dev \
     pcre-dev \
     postgresql-dev \
     libjpeg-turbo-dev \
