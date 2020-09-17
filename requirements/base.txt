@@ -18,6 +18,8 @@ graphql-core==2.2.1
 factory-boy==2.12.0
 wagtail-factories==2.0.0
 wagtail-headless-preview==0.1.4
+tensorflow==2.3.0
+tensorflow-estimator==2.3.0
 gql==2.0.0
 guesslang==2.0.1
 django-crontab==0.7.1
