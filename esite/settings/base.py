@@ -10,7 +10,10 @@ https://docs.djangoproject.com/en/stable/ref/settings/
 
 import os
 from datetime import timedelta
-#from esite.settings.local import *
+try:
+    from esite.settings.local import *
+except ImportError as e:
+    pass
 
 env = os.environ.copy()
 
