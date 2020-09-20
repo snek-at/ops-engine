@@ -666,55 +666,55 @@ class EnterpriseFormPage(BaseEmailFormPage):
             self.slug = f"e-{self.slug}"
 
     def save(self, *args, **kwargs):
-        # if self.pk is None:
-        self.form_fields.add(
-            EnterpriseFormField(
-                label="court_of_registry", field_type="singleline", required=False,
-            ),
-            EnterpriseFormField(
-                label="description", field_type="multiline", required=False,
-            ),
-            EnterpriseFormField(label="email", field_type="email", required=False,),
-            EnterpriseFormField(
-                label="employee_count", field_type="singleline", required=False,
-            ),
-            EnterpriseFormField(
-                label="opensource_url", field_type="singleline", required=False,
-            ),
-            EnterpriseFormField(
-                label="ownership", field_type="singleline", required=False,
-            ),
-            EnterpriseFormField(
-                label="place_of_registry", field_type="singleline", required=False,
-            ),
-            EnterpriseFormField(
-                label="recruiting_url", field_type="singleline", required=False,
-            ),
-            EnterpriseFormField(
-                label="tax_id", field_type="singleline", required=False,
-            ),
-            EnterpriseFormField(
-                label="telefax", field_type="singleline", required=False,
-            ),
-            EnterpriseFormField(
-                label="telephone", field_type="singleline", required=False,
-            ),
-            EnterpriseFormField(
-                label="title", field_type="singleline", required=False,
-            ),
-            EnterpriseFormField(
-                label="trade_register_number", field_type="singleline", required=False,
-            ),
-            EnterpriseFormField(
-                label="vat_number", field_type="singleline", required=False,
-            ),
-            EnterpriseFormField(
-                label="whatsapp_contactline", field_type="singleline", required=False,
-            ),
-            EnterpriseFormField(
-                label="whatsapp_telephone", field_type="singleline", required=False,
-            ),
-        )
+        if self.pk is None:
+            self.form_fields.add(
+                EnterpriseFormField(
+                    label="court_of_registry", field_type="singleline", required=False,
+                ),
+                EnterpriseFormField(
+                    label="description", field_type="multiline", required=False,
+                ),
+                EnterpriseFormField(label="email", field_type="email", required=False,),
+                EnterpriseFormField(
+                    label="employee_count", field_type="singleline", required=False,
+                ),
+                EnterpriseFormField(
+                    label="opensource_url", field_type="singleline", required=False,
+                ),
+                EnterpriseFormField(
+                    label="ownership", field_type="singleline", required=False,
+                ),
+                EnterpriseFormField(
+                    label="place_of_registry", field_type="singleline", required=False,
+                ),
+                EnterpriseFormField(
+                    label="recruiting_url", field_type="singleline", required=False,
+                ),
+                EnterpriseFormField(
+                    label="tax_id", field_type="singleline", required=False,
+                ),
+                EnterpriseFormField(
+                    label="telefax", field_type="singleline", required=False,
+                ),
+                EnterpriseFormField(
+                    label="telephone", field_type="singleline", required=False,
+                ),
+                EnterpriseFormField(
+                    label="title", field_type="singleline", required=False,
+                ),
+                EnterpriseFormField(
+                    label="trade_register_number", field_type="singleline", required=False,
+                ),
+                EnterpriseFormField(
+                    label="vat_number", field_type="singleline", required=False,
+                ),
+                EnterpriseFormField(
+                    label="whatsapp_contactline", field_type="singleline", required=False,
+                ),
+                EnterpriseFormField(
+                    label="whatsapp_telephone", field_type="singleline", required=False,
+                ),
+            )
 
         # after call the built-in cleanups (including default form fields)
         super(EnterpriseFormPage, self).save(*args, **kwargs)
