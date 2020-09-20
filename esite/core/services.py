@@ -1,10 +1,16 @@
 from django.conf import settings
 from pymongo import MongoClient
 
+# mongoclient = MongoClient(
+#     f"mongodb+srv://"
+#     f"{settings.MONGO_USER}:{settings.MONGO_PASSWORD}@{settings.MONGO_HOST}"
+#     f"/?retryWrites=true&w=majority"
+# )
+
 mongoclient = MongoClient(
-    f"mongodb+srv://"
-    f"{settings.MONGO_USER}:{settings.MONGO_PASSWORD}@{settings.MONGO_HOST}"
-    f"/?retryWrites=true&w=majority"
+    settings.MONGO_HOST,
+    username=settings.MONGO_USER,
+    password=settings.MONGO_PASSWORD,
 )
 
 mongodb = mongoclient.get_database("ops_analytics")
