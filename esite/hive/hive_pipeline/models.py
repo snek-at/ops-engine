@@ -94,7 +94,9 @@ class Pipeline(models.Model):
         mongodb.get_collection("pipeline").update(
             {"pipeline_id": self.id},
             {
-                "$addToSet": {"Log": {"$each": raw_data["Log"]},},
+                "$addToSet": {
+                    "Log": {"$each": raw_data["Log"]},
+                },
                 "$set": {
                     "enterprise_page_slug": self.enterprise_page.slug,
                     "repository_url": repository_url,
@@ -117,7 +119,9 @@ class Pipeline(models.Model):
 # Form
 class OpsPipelineFormField(AbstractFormField):
     page = ParentalKey(
-        "OpsPipelineFormPage", on_delete=models.CASCADE, related_name="form_fields",
+        "OpsPipelineFormPage",
+        on_delete=models.CASCADE,
+        related_name="form_fields",
     )
 
 
@@ -155,16 +159,37 @@ class OpsPipelineFormPage(AbstractEmailForm):
             heading="Email Settings",
         ),
         MultiFieldPanel(
-            [InlinePanel("form_fields", label="Form fields")], heading="data",
+            [InlinePanel("form_fields", label="Form fields")],
+            heading="data",
         ),
     ]
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            self.form_fields.add(
+                OpsPipelineFormField(
+                    label="pipeline_token",
+                    field_type="singleline",
+                    required=False,
+                ),
+                OpsPipelineFormField(
+                    label="raw_data",
+                    field_type="singleline",
+                    required=False,
+                ),
+            )
+
+        # after call the built-in cleanups (including default form fields)
+        super(OpsPipelineFormPage, self).save(*args, **kwargs)
 
     def get_submission_class(self):
         return OpsPipelineFormSubmission
 
     # Create a new user
     def handle_input(
-        self, id, raw_data,
+        self,
+        id,
+        raw_data,
     ):
         Pipeline.objects.get(id=id).analyse(raw_data=raw_data)
 
@@ -199,7 +224,8 @@ class OpsPipelineFormPage(AbstractEmailForm):
         )
 
         self.get_submission_class().objects.create(
-            form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder), page=self,
+            form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
+            page=self,
         )
 
         if self.to_address:
