@@ -29,7 +29,7 @@ ADD requirements/ /requirements/
 # We need to recreate the /usr/share/man/man{1..8} directories first because
 # they were clobbered by a parent image.
 RUN echo "## Installing RUN dependencies ##" && \
-    && RUN_DEPS=" \
+    RUN_DEPS=" \
     bash \
     libexpat1 \
     libjpeg62-turbo \
