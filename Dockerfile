@@ -30,6 +30,7 @@ ADD requirements/ /requirements/
 # they were clobbered by a parent image.
 RUN echo "## Installing RUN dependencies ##" && \
     RUN_DEPS=" \
+    tini \
     bash \
     libexpat1 \
     libjpeg62-turbo \
@@ -47,7 +48,7 @@ RUN echo "## Installing RUN dependencies ##" && \
 ADD requirements/ /requirements/
 
 RUN echo "## Installing BUILD dependencies ##" && \
-    && BUILD_DEPS=" \
+    BUILD_DEPS=" \
     build-essential \
     git \
     libexpat1-dev \
