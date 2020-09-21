@@ -40,6 +40,7 @@ RUN echo "## Installing RUN dependencies ##" && \
     postgresql-client \
     procps \
     zlib1g \
+    cron \
     " \
     && seq 1 8 | xargs -I{} mkdir -p /usr/share/man/man{} \
     && apt-get update && apt-get install -y --no-install-recommends $RUN_DEPS \
@@ -56,7 +57,6 @@ RUN echo "## Installing BUILD dependencies ##" && \
     libpcre3-dev \
     libpq-dev \
     zlib1g-dev \
-    cron \
     " \
     && apt-get update && apt-get install -y --no-install-recommends $BUILD_DEPS \
     && python3.7 -m venv /venv \
