@@ -4,6 +4,7 @@ from django.db import migrations
 from wagtail.core.models import Page as Pagec
 
 from ...hive.hive_enterprise.models import EnterpriseFormPage, EnterpriseIndex
+from ...hive.hive_pipeline.models import OpsPipelineFormPage
 
 
 def create_homepage(apps, schema_editor):
@@ -31,27 +32,38 @@ def create_homepage(apps, schema_editor):
         numchild=0,
         url_path="/ops/",
     )
-    
-    
 
     # Create default site
     Site.objects.create(root_page_id=enterprise_page.id, is_default_site=True)
-    
+
+    home_page = Pagec.objects.get(slug="ops-management").specific
+
+    # Create pipeline form page
+    pipeline_page = OpsPipelineFormPage(
+        title="Pipeline Form Page",
+        slug="pipeline",
+        head="Pipeline Form",
+        description="The sumbission form for SITP",
+    )
+    home_page.add_child(instance=pipeline_page)
+
     # Create enterprise index
-    home_page = Pagec.objects.get(slug='ops-management').specific    
-    enterprise_index = EnterpriseIndex(title="Enterprise Index", slug="enterprise-pages")
+    enterprise_index = EnterpriseIndex(
+        title="Enterprise Index", slug="enterprise-pages"
+    )
     home_page.add_child(instance=enterprise_index)
-    
+
     home_page.save()
-    
+
     # Create enterprise page
     enterprise_name = settings.ENTERPRISE_NAME
     enterprise_index = Pagec.objects.get(slug="enterprise-pages").specific
-    enterprise_page = EnterpriseFormPage(title=f"{enterprise_name}", slug=f"e-{enterprise_name.lower()}")
+    enterprise_page = EnterpriseFormPage(
+        title=f"{enterprise_name}", slug=f"e-{enterprise_name.lower()}"
+    )
     enterprise_index.add_child(instance=enterprise_page)
-    
+
     enterprise_index.save()
-    
 
 
 def remove_homepage(apps, schema_editor):
@@ -71,6 +83,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("hive_enterprise", "0001_initial"),
+        ("hive_pipeline", "0001_initial"),
     ]
 
     operations = [

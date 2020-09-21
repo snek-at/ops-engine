@@ -56,21 +56,22 @@ RUN echo "## Installing BUILD dependencies ##" && \
     libpcre3-dev \
     libpq-dev \
     zlib1g-dev \
+    cron \
     " \
     && apt-get update && apt-get install -y --no-install-recommends $BUILD_DEPS \
     && python3.7 -m venv /venv \
     && /venv/bin/pip install -U pip \
     && /venv/bin/pip install --no-cache-dir -r /requirements/production.txt \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $BUILD_DEPS \
-    && rm -rf /var/lib/apt/lists/*
-
+    && rm -rf /var/lib/apt/lists/* 
 EXPOSE 8000
 
 VOLUME /code/media
 
 ADD . /code/
 
-# Place init, make it executable and
+
+## Place init, make it executable and
 # make sure venv files can be used by uWSGI process:
 RUN mv /code/docker-entrypoint.sh / ;\
     chmod +x /docker-entrypoint.sh ;\

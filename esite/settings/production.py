@@ -63,11 +63,11 @@ if "GOOGLE_TAG_MANAGER_ID" in env:
 # > SSL Header
 # Used to detect secure connection proberly on Heroku.
 # See https://wagtail.io/blog/deploying-wagtail-heroku/
-#SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # > SSL Redirect
 # Every rquest gets redirected to HTTPS
-#SECURE_SSL_REDIRECT = env.get("DJANGO_SECURE_SSL_REDIRECT", "off") == "on"
+# SECURE_SSL_REDIRECT = env.get("DJANGO_SECURE_SSL_REDIRECT", "off") == "on"
 
 # > Allowed Hosts
 # Accept all hostnames, since we don't know in advance
@@ -96,13 +96,13 @@ CACHE_CONTROL_STALE_WHILE_REVALIDATE = int(
 
 # > Force HTTPS Redirect
 # https://docs.djangoproject.com/en/stable/ref/settings/#secure-ssl-redirect
-#if env.get("SECURE_SSL_REDIRECT", "true").strip().lower() == "true":
+# if env.get("SECURE_SSL_REDIRECT", "true").strip().lower() == "true":
 #    SECURE_SSL_REDIRECT = True
 
 # This will allow the cache to swallow the fact that the website is behind TLS
 # and inform the Django using "X-Forwarded-Proto" HTTP header.
 # https://docs.djangoproject.com/en/stable/ref/settings/#secure-proxy-ssl-header
-#SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # This is a setting setting HSTS header. This will enforce the visitors to use
 # HTTPS for an amount of time specified in the header. Please make sure you
@@ -225,8 +225,16 @@ LOGGING = {
         }
     },
     "loggers": {
-        "esite": {"handlers": ["console"], "level": "INFO", "propagate": False,},
-        "wagtail": {"handlers": ["console"], "level": "INFO", "propagate": False,},
+        "esite": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "wagtail": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
         "django.request": {
             "handlers": ["console"],
             "level": "WARNING",
@@ -243,7 +251,10 @@ LOGGING = {
 # Add embeds for streamfield.
 if "EMBEDLY_API_KEY" in env:
     WAGTAILEMBEDS_FINDERS = [
-        {"class": "wagtail.embeds.finders.embedly", "key": env["EMBEDLY_API_KEY"],}
+        {
+            "class": "wagtail.embeds.finders.embedly",
+            "key": env["EMBEDLY_API_KEY"],
+        }
     ]
 
 # MIDDLEWARE.append('django_referrer_policy.middleware.ReferrerPolicyMiddleware')
@@ -288,10 +299,10 @@ if "RECAPTCHA_PUBLIC_KEY" in env and "RECAPTCHA_PRIVATE_KEY" in env:
 # These setthings are required for hive interface to work.
 if "HIVE_PASSWORD" in env:
     HIVE_PASSWORD = env["HIVE_PASSWORD"]
-    
+
 if "DEFAULT_ENTERPRISE_NAME" in env:
     ENTERPRISE_NAME = env["DEFAULT_ENTERPRISE_NAME"]
-    
+
 # > Mongo
 if "MONGO_INITDB_ROOT_USERNAME" in env:
     MONGO_USER = env["MONGO_INITDB_ROOT_USERNAME"]

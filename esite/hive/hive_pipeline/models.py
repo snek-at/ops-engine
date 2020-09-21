@@ -130,8 +130,16 @@ class OpsPipelineFormPage(AbstractEmailForm):
     parent_page_types = ["wagtailcore.Page"]
 
     # When creating a new Form page in Wagtail
-    head = models.CharField(null=True, blank=False, max_length=255)
-    description = models.CharField(null=True, blank=False, max_length=255)
+    head = models.CharField(
+        null=True,
+        blank=False,
+        max_length=255,
+    )
+    description = models.CharField(
+        null=True,
+        blank=False,
+        max_length=255,
+    )
 
     graphql_fields = [
         GraphQLString("head"),

@@ -1,5 +1,4 @@
 """esite URL Configuration
-
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.2/topics/http/urls/
 Examples:
@@ -17,7 +16,7 @@ from django.apps import apps
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib import admin
-from django.urls import include, path, re_path
+from django.urls import include, path
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import TemplateView
 
@@ -28,9 +27,10 @@ from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.utils.urlpatterns import decorate_urlpatterns
 
 from esite.bifrost import urls as api_urls
-
 from esite.utils.cache import get_default_cache_control_decorator
 from esite.utils.views import favicon, robots
+
+# from esite.search import views as search_views
 
 
 # Private URLs are not meant to be cached.
@@ -39,8 +39,8 @@ private_urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("ops-admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
-    re_path("", TemplateView.as_view(template_name="index.html")),
-
+    # Search cache-control headers are set on the view itself.
+    # path('search/', search_views.search, name='search'),
 ]
 
 
@@ -100,9 +100,8 @@ urlpatterns = (
     private_urlpatterns
     + urlpatterns
     + [
-        # Add Wagtail URLs at the end.
-        # Wagtail cache-control is set on the page models's serve methods.
-        path("", include(wagtail_urls)),
+        # Add OPS SPA URLs at the end.
+        url(r"^(?:.*)/?$", TemplateView.as_view(template_name="index.html")),
     ]
 )
 

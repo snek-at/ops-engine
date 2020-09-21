@@ -15,12 +15,15 @@ def create_initialuser(apps, schema_editor):
     anonuser.save()
 
     # Create admin user
-    adminuser = User.objects.create(username="admin", is_superuser=True,)
+    adminuser = User.objects.create(
+        username="admin",
+        is_superuser=True,
+    )
 
     adminuser.set_password("ciscocisco")
 
     adminuser.save()
-    
+
     # Create hive user
     hiveuser = User.objects.create(username="snekman")
 
@@ -38,7 +41,7 @@ def remove_initialuser(apps, schema_editor):
 
     # Delete the admin user
     User.objects.get(username="admin").delete()
-    
+
     # Delete the hive user
     User.objects.get(username="hive").delete()
 

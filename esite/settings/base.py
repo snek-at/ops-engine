@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/stable/ref/settings/
 
 import os
 from datetime import timedelta
+
 try:
     from esite.settings.local import *
 except ImportError as e:
@@ -162,7 +163,9 @@ DATABASES = {
 # > Graphene Configuration
 GRAPHENE = {
     "SCHEMA": "esite.bifrost.schema.schema",
-    "MIDDLEWARE": ["graphql_jwt.middleware.JSONWebTokenMiddleware",],
+    "MIDDLEWARE": [
+        "graphql_jwt.middleware.JSONWebTokenMiddleware",
+    ],
 }
 
 GRAPHQL_JWT = {
@@ -193,9 +196,15 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
 ]
 
 AUTH_USER_MODEL = "user.SNEKUser"
@@ -258,7 +267,10 @@ WAGTAIL_SITE_NAME = "esite"
 # > Search Configuration
 # https://docs.wagtail.io/en/latest/topics/search/backends.html
 WAGTAILSEARCH_BACKENDS = {
-    "default": {"BACKEND": "wagtail.search.backends.db", "INDEX": "esite",},
+    "default": {
+        "BACKEND": "wagtail.search.backends.db",
+        "INDEX": "esite",
+    },
 }
 
 # Custom document model
@@ -348,7 +360,7 @@ MONGO_USER = "root"
 MONGO_PASSWORD = "rootpassword"
 
 # > Hive
-ENTERPRISE_NAME = 'CUSTOM-ENTERPRISE-PAGE'
+ENTERPRISE_NAME = "CUSTOM-ENTERPRISE-PAGE"
 
 
 # SPDX-License-Identifier: (EUPL-1.2)
