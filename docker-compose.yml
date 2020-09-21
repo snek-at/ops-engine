@@ -27,7 +27,7 @@ services:
       - "DJANGO_SECRET_KEY=changeme"
       - "DATABASE_URL=postgres://app_user:changeme@db/app_db"
       - "DEFAULT_ENTERPRISE_NAME=snek"
-      - "HIVE_PASSWORD=test"
+      - "HIVE_PASSWORD=Dq8N2648kt[&Q@$W"
     links:
       - "db:db"
     ports:

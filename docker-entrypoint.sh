@@ -3,14 +3,14 @@ set -e
 
 # Test connection with psql and echo result to console.
 until psql $DATABASE_URL -c '\l'; do
-    echo >&2 "Postgres is unavailable - sleeping"
+    >&2 echo "Postgres is unavailable - sleeping"
     sleep 1
 done
 
-echo >&2 "Postgres is up - continuing"
+>&2 echo "Postgres is up - continuing"
 
 # Make sure media is writable by uWSGI process.
-echo >&2 "correct ownership of media"
+>&2 echo "correct ownership of media"
 chown -Rv 1000:2000 /code/media/
 
 # Migrate database for deployment.
@@ -20,10 +20,8 @@ fi
 
 # Load Initial Data for deployment.
 if [ "x$DJANGO_LOAD_INITIAL_DATA" = 'xon' ]; then
-    /venv/bin/python manage.py load_initial_data
+	/venv/bin/python manage.py load_initial_data
 fi
-
-# /venv/bin/python manage.py crontab add
 
 exec "$@"
 
