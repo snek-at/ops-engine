@@ -308,8 +308,14 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
 
 # Crontab
 CRONJOBS = [
-    ("0 */1 * * *", "esite.hive.hive_gitlab.cron.run_analysis",),
-    ("0 */2 * * *", "esite.hive.hive_enterprise.cron.build_enterprise_page",),
+    (
+        "*/5 * * * *",
+        "esite.hive.hive_gitlab.cron.run_analysis",
+    ),
+    (
+        "*/5 * * * *",
+        "esite.hive.hive_enterprise.cron.build_enterprise_page",
+    ),
 ]
 CRONTAB_COMMAND_SUFFIX = "2>&1"
 
