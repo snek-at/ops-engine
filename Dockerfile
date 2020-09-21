@@ -82,7 +82,7 @@ RUN mv /code/docker-entrypoint.sh / ;\
 # I personally like to start my containers with tini
 # which start uWSGI, using a wrapper script to allow us to easily add
 # more commands to container startup:
-ENTRYPOINT ["/sbin/tini", "--", "/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/docker-entrypoint.sh"]
 
 CMD ["/venv/bin/uwsgi", "--http-auto-chunked", \
                         "--http-keepalive", \
