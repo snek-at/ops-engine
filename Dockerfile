@@ -31,7 +31,6 @@ ADD requirements/ /requirements/
 RUN echo "## Installing RUN dependencies ##" && \
     && RUN_DEPS=" \
     bash \
-    tini \
     libexpat1 \
     libjpeg62-turbo \
     libpcre3 \
